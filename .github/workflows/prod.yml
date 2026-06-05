@@ -47,6 +47,8 @@ jobs:
           port: ${{ secrets.VPS_1_HOST_PORT }}
           script: |
             cd /media/${{ github.event.repository.name }}
+            # Pull latest repository changes (like nginx.conf)
+            git pull origin main
             # Inject Docker username for pulling images
             export DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
             # Pull new images from Docker Hub
