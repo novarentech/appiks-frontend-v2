@@ -1,10 +1,10 @@
 import { auth } from "./auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import type { UserRole } from "@appiks/types";
+import type { UserRole, CustomUser } from "@appiks/types";
 import { ROLE_REDIRECT_MAP } from "@appiks/types";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes — always allow
@@ -29,8 +29,8 @@ export async function middleware(request: NextRequest) {
 
     // If authenticated user visits root, redirect based on role
     if (pathname === "/") {
-      const role = session.user?.role as UserRole;
-      const redirectUrl = ROLE_REDIRECT_MAP[role] ?? "/login";
+      const role = (session.user as CustomUser)?.role;
+      const redirectUrl = (role && ROLE_REDIRECT_MAP[role]) ?? "/login";
       return NextResponse.redirect(redirectUrl);
     }
 

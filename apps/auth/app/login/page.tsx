@@ -51,11 +51,11 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900">
+    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 via-purple-950 to-slate-900">
       <div className="w-full max-w-md px-8 py-10 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 shadow-lg shadow-purple-500/30 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-violet-500 to-purple-700 shadow-lg shadow-purple-500/30 mb-4">
             <span className="text-2xl font-black text-white">A</span>
           </div>
           <h1 className="text-2xl font-bold text-white">Selamat Datang</h1>
@@ -113,7 +113,7 @@ export default function LoginPage() {
             id="btn-login"
             type="submit"
             disabled={isLoading}
-            className="w-full h-11 rounded-xl bg-gradient-to-r from-violet-600 to-purple-700 text-white font-semibold text-sm hover:from-violet-500 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/25"
+            className="w-full h-11 rounded-xl bg-linear-to-r from-violet-600 to-purple-700 text-white font-semibold text-sm hover:from-violet-500 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/25"
           >
             {isLoading ? "Memproses..." : "Masuk"}
           </button>

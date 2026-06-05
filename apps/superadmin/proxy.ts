@@ -2,12 +2,14 @@ import { auth } from "./auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import type { CustomUser } from "@appiks/types";
+
 const ALLOWED_ROLES = ["super"] as const;
 const AUTH_URL = process.env.NODE_ENV === "production"
   ? "https://auth.appiks.id/login"
   : "http://localhost:3000/login";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   try {
@@ -17,8 +19,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(AUTH_URL);
     }
 
-    const role = session.user?.role as string;
-    const hasAccess = ALLOWED_ROLES.includes(role as (typeof ALLOWED_ROLES)[number]);
+    const role = (session.user as CustomUser)?.role;
+    const hasAccess = role ? ALLOWED_ROLES.includes(role as any) : false;
 
     if (!hasAccess) {
       const unauthorizedUrl = process.env.NODE_ENV === "production"
