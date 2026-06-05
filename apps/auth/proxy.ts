@@ -7,19 +7,25 @@ import { ROLE_REDIRECT_MAP } from "@appiks/types";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Public routes — always allow
-  if (["/login", "/unauthorized"].some((r) => pathname.startsWith(r))) {
-    return NextResponse.next();
-  }
-
-  // /logout — allow but handle via page
-  if (pathname.startsWith("/logout")) {
-    return NextResponse.next();
-  }
-
-  // For any other route, check session
   try {
     const session = await auth();
+
+    // Redirect logged-in users away from /login
+    if (session && pathname.startsWith("/login")) {
+      const role = (session.user as CustomUser)?.role;
+      const redirectUrl = (role && ROLE_REDIRECT_MAP[role]) ?? "/";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Public routes — always allow
+    if (["/login", "/unauthorized"].some((r) => pathname.startsWith(r))) {
+      return NextResponse.next();
+    }
+
+    // /logout — allow but handle via page
+    if (pathname.startsWith("/logout")) {
+      return NextResponse.next();
+    }
 
     if (!session) {
       const loginUrl = new URL("/login", request.url);
