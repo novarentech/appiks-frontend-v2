@@ -1,18 +1,30 @@
+import { Button } from "@appiks/ui";
+import Link from "next/link";
+import Image from "next/image";
+
 export default function UnauthorizedPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900">
-      <div className="text-center px-8">
-        <div className="text-6xl mb-4">🚫</div>
-        <h1 className="text-2xl font-bold text-white mb-2">Akses Ditolak</h1>
-        <p className="text-white/50 text-sm mb-8">
-          Anda tidak memiliki izin untuk mengakses halaman ini.
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
+      <div className="flex flex-col items-center text-center max-w-2xl w-full">
+        <div className="relative w-full max-w-[280px] sm:max-w-[350px] md:max-w-[450px] aspect-square mb-4 md:mb-8">
+          <Image
+            src="/image/403ErrorForbidden.gif"
+            alt="403 Forbidden"
+            fill
+            className="object-contain"
+            unoptimized
+          />
+        </div>
+        <h1 className="font-bold text-2xl md:text-3xl text-foreground mb-2">
+          Sepertinya jalan ini ditutup...
+        </h1>
+        <p className="text-muted-foreground mb-8">
+          Anda tidak memiliki izin untuk melewati rute ini. Mari putar balik dan
+          kembali ke beranda.
         </p>
-        <a
-          href="/login"
-          className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-700 text-white font-semibold text-sm hover:from-violet-500 hover:to-purple-600 transition-all"
-        >
-          Kembali ke Login
-        </a>
+        <Button asChild size="lg" className="w-full rounded-full sm:w-auto min-w-[200px]">
+          <Link href="/login">KEMBALI KE BERANDA</Link>
+        </Button>
       </div>
     </main>
   );

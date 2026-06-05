@@ -10,3 +10,5 @@ export * from "./components/Input";
 export * from "./components/Card";
 export * from "./components/DataTable";
 export * from "./components/Skeleton";
+export * from "./components/form";
+export * from "./components/label";
