@@ -92,6 +92,20 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      
+      try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname === "appiks.id" || urlObj.hostname.endsWith(".appiks.id")) {
+          return url;
+        }
+      } catch {
+      }
+
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
   },
   cookies: sharedCookies,
   pages: { signIn: "/login" },
