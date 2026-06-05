@@ -1,5 +1,6 @@
 services:
   auth:
+    image: ${DOCKER_USERNAME:-novarentech}/appiks-auth:latest
     build:
       context: ./apps/auth
       dockerfile: Dockerfile
@@ -9,6 +10,7 @@ services:
     restart: unless-stopped
 
   landing:
+    image: ${DOCKER_USERNAME:-novarentech}/appiks-landing:latest
     build:
       context: ./apps/landing
       dockerfile: Dockerfile
@@ -17,6 +19,7 @@ services:
     restart: unless-stopped
 
   student:
+    image: ${DOCKER_USERNAME:-novarentech}/appiks-student:latest
     build:
       context: ./apps/student
       dockerfile: Dockerfile
@@ -26,6 +29,7 @@ services:
     restart: unless-stopped
 
   school:
+    image: ${DOCKER_USERNAME:-novarentech}/appiks-school:latest
     build:
       context: ./apps/school
       dockerfile: Dockerfile
@@ -35,6 +39,7 @@ services:
     restart: unless-stopped
 
   psychologist:
+    image: ${DOCKER_USERNAME:-novarentech}/appiks-psychologist:latest
     build:
       context: ./apps/psychologist
       dockerfile: Dockerfile
@@ -44,6 +49,7 @@ services:
     restart: unless-stopped
 
   superadmin:
+    image: ${DOCKER_USERNAME:-novarentech}/appiks-superadmin:latest
     build:
       context: ./apps/superadmin
       dockerfile: Dockerfile
