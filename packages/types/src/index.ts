@@ -18,14 +18,16 @@ export const SCHOOL_ROLES: UserRole[] = [
   "head_teacher",
 ];
 
+const isProd = process.env.NODE_ENV === "production";
+
 export const ROLE_REDIRECT_MAP: Record<UserRole, string> = {
-  student: "https://app.appiks.id/dashboard",
-  admin: "https://school.appiks.id/dashboard",
-  teacher: "https://school.appiks.id/dashboard",
-  counselor: "https://school.appiks.id/dashboard",
-  head_teacher: "https://school.appiks.id/dashboard",
-  psychologist: "https://psikolog.appiks.id/dashboard",
-  super: "https://super.appiks.id/dashboard",
+  student: isProd ? "https://app.appiks.id/dashboard" : "http://localhost:3001/dashboard",
+  admin: isProd ? "https://school.appiks.id/dashboard" : "http://localhost:3002/dashboard",
+  teacher: isProd ? "https://school.appiks.id/dashboard" : "http://localhost:3002/dashboard",
+  counselor: isProd ? "https://school.appiks.id/dashboard" : "http://localhost:3002/dashboard",
+  head_teacher: isProd ? "https://school.appiks.id/dashboard" : "http://localhost:3002/dashboard",
+  psychologist: isProd ? "https://psikolog.appiks.id/dashboard" : "http://localhost:3003/dashboard",
+  super: isProd ? "https://super.appiks.id/dashboard" : "http://localhost:3004/dashboard",
 };
 
 // ─── User & Session ────────────────────────────────────────────────────────────

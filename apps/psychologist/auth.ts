@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import type { CustomUser } from "@appiks/types";
+import { sharedCookies } from "@appiks/auth";
 
 /**
  * Auth config untuk app ini — TIDAK memiliki login page sendiri.
@@ -26,6 +27,7 @@ export const { auth, handlers } = NextAuth({
     },
   },
   pages: { signIn: process.env.AUTH_URL ?? "http://localhost:3000/login" },
+  cookies: sharedCookies,
   session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
 });

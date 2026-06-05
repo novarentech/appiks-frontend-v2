@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { loginAPI, buildUserFromToken, isTokenExpiredByDate, shouldRefreshToken, refreshTokenAPI } from "@appiks/auth";
+import { loginAPI, buildUserFromToken, isTokenExpiredByDate, shouldRefreshToken, refreshTokenAPI, sharedCookies } from "@appiks/auth";
 import { loginSchema } from "@appiks/types";
 import type { CustomUser } from "@appiks/types";
 
@@ -93,18 +93,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return session;
     },
   },
-  cookies: {
-    sessionToken: {
-      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" ? ".appiks.id" : undefined,
-      },
-    },
-  },
+  cookies: sharedCookies,
   pages: { signIn: "/login" },
   session: { strategy: "jwt", maxAge: 24 * 60 * 60 },
   secret: process.env.NEXTAUTH_SECRET,

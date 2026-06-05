@@ -5,10 +5,8 @@ import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput, ROLE_REDIRECT_MAP, type UserRole } from "@appiks/types";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,7 +37,7 @@ export default function LoginPage() {
       const role = session?.user?.role as UserRole | undefined;
 
       if (role && ROLE_REDIRECT_MAP[role]) {
-        router.replace(ROLE_REDIRECT_MAP[role]);
+        window.location.assign(ROLE_REDIRECT_MAP[role]);
       } else {
         setError("Role tidak dikenali. Hubungi administrator.");
       }
