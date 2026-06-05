@@ -1,0 +1,47 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Appiks — Platform Kesehatan Mental Pelajar">
+  <main class="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center px-6">
+    
+    <!-- Hero Section (placeholder) -->
+    <section class="text-center max-w-3xl mx-auto py-24">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-500 to-purple-700 shadow-2xl shadow-purple-500/30 mb-8">
+        <span class="text-4xl font-black">A</span>
+      </div>
+      
+      <h1 class="text-5xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+        Appiks
+      </h1>
+      
+      <p class="text-xl text-white/60 mb-10 leading-relaxed">
+        Platform kesehatan mental untuk pelajar Indonesia.<br />
+        Lebih bahagia, lebih sehat, lebih berprestasi.
+      </p>
+      
+      <a
+        href="https://auth.appiks.id/login"
+        id="cta-login"
+        class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-700 text-white font-bold text-lg hover:from-violet-500 hover:to-purple-600 transition-all shadow-xl shadow-purple-500/30"
+      >
+        Masuk ke Aplikasi →
+      </a>
+    </section>
+
+    <!-- Features placeholder -->
+    <section class="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 pb-24">
+      {[
+        { icon: "💆", title: "Check-in Mood", desc: "Pantau suasana hati harianmu dengan mudah" },
+        { icon: "📚", title: "Konten Edukasi", desc: "Artikel dan video untuk kesehatan mental" },
+        { icon: "🤝", title: "Konseling", desc: "Terhubung langsung dengan konselor sekolah" },
+      ].map((f) => (
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-6 backdrop-blur-md">
+          <div class="text-4xl mb-3">{f.icon}</div>
+          <h3 class="font-bold text-lg mb-2">{f.title}</h3>
+          <p class="text-white/50 text-sm">{f.desc}</p>
+        </div>
+      ))}
+    </section>
+  </main>
+</Layout>
