@@ -29,19 +29,12 @@ COPY turbo.json turbo.json
 RUN npx turbo run build --filter=@appiks/landing
 
 # Step 4: Runner
-FROM base AS runner
-WORKDIR /app
+FROM nginx:alpine AS runner
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 astrojs
+# Copy the built static files to Nginx html directory
+COPY --from=builder /app/apps/landing/dist /usr/share/nginx/html
 
-# Copy built app and dependencies
-COPY --from=builder /app ./
+# Expose port 80
+EXPOSE 80
 
-USER astrojs
-
-EXPOSE 4321
-ENV PORT 4321
-ENV HOSTNAME "0.0.0.0"
-
-CMD ["npm", "run", "preview", "--workspace=@appiks/landing"]
+CMD ["nginx", "-g", "daemon off;"]
