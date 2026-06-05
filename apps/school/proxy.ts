@@ -4,10 +4,16 @@ import type { NextRequest } from "next/server";
 
 import type { CustomUser } from "@appiks/types";
 
-const ALLOWED_ROLES = ["admin", "teacher", "counselor", "head_teacher"] as const;
-const AUTH_URL = process.env.NODE_ENV === "production"
-  ? "https://auth.appiks.id/login"
-  : "http://localhost:3000/login";
+const ALLOWED_ROLES = [
+  "admin",
+  "teacher",
+  "counselor",
+  "head_teacher",
+] as const;
+const AUTH_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://auth.appiks.id/login"
+    : "http://localhost:3000/login";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function proxy(request: NextRequest) {
@@ -19,12 +25,15 @@ export async function proxy(request: NextRequest) {
     }
 
     const role = (session.user as CustomUser)?.role;
-    const hasAccess = role ? ALLOWED_ROLES.includes(role as (typeof ALLOWED_ROLES)[number]) : false;
+    const hasAccess = role
+      ? ALLOWED_ROLES.includes(role as (typeof ALLOWED_ROLES)[number])
+      : false;
 
     if (!hasAccess) {
-      const unauthorizedUrl = process.env.NODE_ENV === "production"
-        ? "https://auth.appiks.id/unauthorized"
-        : "http://localhost:3000/unauthorized";
+      const unauthorizedUrl =
+        process.env.NODE_ENV === "production"
+          ? "https://auth.appiks.id/unauthorized"
+          : "http://localhost:3000/unauthorized";
       return NextResponse.redirect(unauthorizedUrl);
     }
 
@@ -36,6 +45,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.svg).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.svg|.*\\.webp|.*\\.gif).*)",
   ],
 };
