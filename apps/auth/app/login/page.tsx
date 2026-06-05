@@ -39,7 +39,7 @@ export default function LoginPage() {
       const role = session?.user?.role as UserRole | undefined;
 
       if (role && ROLE_REDIRECT_MAP[role]) {
-        window.location.href = ROLE_REDIRECT_MAP[role];
+        router.replace(ROLE_REDIRECT_MAP[role]);
       } else {
         setError("Role tidak dikenali. Hubungi administrator.");
       }

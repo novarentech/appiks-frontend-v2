@@ -1,7 +1,7 @@
 import { auth } from "./auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import type { UserRole, CustomUser } from "@appiks/types";
+import type { CustomUser } from "@appiks/types";
 import { ROLE_REDIRECT_MAP } from "@appiks/types";
 
 export async function proxy(request: NextRequest) {

@@ -9,9 +9,8 @@ const AUTH_URL = process.env.NODE_ENV === "production"
   ? "https://auth.appiks.id/login"
   : "http://localhost:3000/login";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
   try {
     const session = await auth();
 
@@ -20,7 +19,7 @@ export async function proxy(request: NextRequest) {
     }
 
     const role = (session.user as CustomUser)?.role;
-    const hasAccess = role ? ALLOWED_ROLES.includes(role as any) : false;
+    const hasAccess = role ? ALLOWED_ROLES.includes(role as (typeof ALLOWED_ROLES)[number]) : false;
 
     if (!hasAccess) {
       const unauthorizedUrl = process.env.NODE_ENV === "production"
