@@ -62,6 +62,13 @@ interface DataTableProps<TData, TValue> {
   pageSizeOptions?: number[];
   defaultPageSize?: number;
   className?: string;
+  sorting?: SortingState;
+  onSortingChange?: React.Dispatch<React.SetStateAction<SortingState>>;
+  columnFilters?: ColumnFiltersState;
+  onColumnFiltersChange?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
+  globalFilter?: string;
+  onGlobalFilterChange?: (value: string) => void;
+  onReset?: () => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -74,12 +81,22 @@ export function DataTable<TData, TValue>({
   pageSizeOptions = [5, 10, 20, 50, 100],
   defaultPageSize = 10,
   className,
+  sorting,
+  onSortingChange,
+  columnFilters,
+  onColumnFiltersChange,
+  globalFilter,
+  onGlobalFilterChange,
+  onReset,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
+  const [internalColumnFilters, setInternalColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [internalGlobalFilter, setInternalGlobalFilter] = React.useState("");
+
+  const resolvedSorting = sorting !== undefined ? sorting : internalSorting;
+  const resolvedColumnFilters = columnFilters !== undefined ? columnFilters : internalColumnFilters;
+  const resolvedGlobalFilter = globalFilter !== undefined ? globalFilter : internalGlobalFilter;
+  const resolvedOnGlobalFilterChange = onGlobalFilterChange || setInternalGlobalFilter;
 
   const table = useReactTable({
     data,
@@ -88,15 +105,19 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    state: { sorting, columnFilters, globalFilter },
+    onSortingChange: onSortingChange || setInternalSorting,
+    onColumnFiltersChange: onColumnFiltersChange || setInternalColumnFilters,
+    onGlobalFilterChange: resolvedOnGlobalFilterChange,
+    state: {
+      sorting: resolvedSorting,
+      columnFilters: resolvedColumnFilters,
+      globalFilter: resolvedGlobalFilter,
+    },
     initialState: { pagination: { pageSize: defaultPageSize } },
   });
 
   const isFiltered =
-    table.getState().columnFilters.length > 0 || globalFilter !== "";
+    table.getState().columnFilters.length > 0 || resolvedGlobalFilter !== "";
 
   // Pagination page numbers list with ellipsis helper
   const currentPage = table.getState().pagination.pageIndex;
@@ -146,7 +167,7 @@ export function DataTable<TData, TValue>({
                 <input
                   placeholder={searchPlaceholder}
                   value={globalFilter}
-                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  onChange={(e) => resolvedOnGlobalFilterChange(e.target.value)}
                   className="h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 py-1 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 />
               </div>
@@ -188,8 +209,16 @@ export function DataTable<TData, TValue>({
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  table.resetColumnFilters();
-                  setGlobalFilter("");
+                  if (onReset) {
+                    onReset();
+                  } else {
+                    if (onColumnFiltersChange) {
+                      onColumnFiltersChange([]);
+                    } else {
+                      table.resetColumnFilters();
+                    }
+                    resolvedOnGlobalFilterChange("");
+                  }
                 }}
                 className="h-9 px-2 lg:px-3 text-muted-foreground hover:text-foreground shrink-0"
               >

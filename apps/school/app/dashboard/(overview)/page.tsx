@@ -2,6 +2,9 @@
 
 import { DashboardHeader, DashboardPanel, DataTable, Button, type FilterColumn } from "@appiks/ui";
 import { GraduationCap, BookOpen, Users, FileText, Plus } from "lucide-react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { type ColumnFiltersState } from "@tanstack/react-table";
+import * as React from "react";
 
 const columns = [
   {
@@ -127,6 +130,74 @@ const filterColumns: FilterColumn[] = [
 ];
 
 export default function Page() {
+  return (
+    <React.Suspense fallback={<div className="p-8 text-center text-sm text-muted-foreground animate-pulse">Memuat dashboard...</div>}>
+      <DashboardOverview />
+    </React.Suspense>
+  );
+}
+
+function DashboardOverview() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Read URL search params
+  const searchQuery = searchParams.get("search") || "";
+  const statusQuery = searchParams.get("status") || "";
+  const classQuery = searchParams.get("class") || "";
+
+  // Map to TanStack Table columnFilters
+  const columnFilters = React.useMemo<ColumnFiltersState>(() => {
+    const filters: ColumnFiltersState = [];
+    if (statusQuery) {
+      filters.push({ id: "status", value: statusQuery });
+    }
+    if (classQuery) {
+      filters.push({ id: "class", value: classQuery });
+    }
+    return filters;
+  }, [statusQuery, classQuery]);
+
+  // Sync to URL
+  const updateQueryParams = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === "") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const handleGlobalFilterChange = (value: string) => {
+    updateQueryParams({ search: value });
+  };
+
+  const handleColumnFiltersChange = (updaterOrValue: any) => {
+    const nextFilters = typeof updaterOrValue === "function" 
+      ? updaterOrValue(columnFilters) 
+      : updaterOrValue;
+
+    const statusVal = nextFilters.find((f: any) => f.id === "status")?.value || "";
+    const classVal = nextFilters.find((f: any) => f.id === "class")?.value || "";
+
+    updateQueryParams({
+      status: statusVal || null,
+      class: classVal || null,
+    });
+  };
+
+  const handleReset = () => {
+    updateQueryParams({
+      search: null,
+      status: null,
+      class: null,
+    });
+  };
+
   const statItems = [
     {
       icon: GraduationCap,
@@ -189,6 +260,11 @@ export default function Page() {
               </Button>
             }
             defaultPageSize={5}
+            globalFilter={searchQuery}
+            onGlobalFilterChange={handleGlobalFilterChange}
+            columnFilters={columnFilters}
+            onColumnFiltersChange={handleColumnFiltersChange}
+            onReset={handleReset}
           />
         </div>
       </div>

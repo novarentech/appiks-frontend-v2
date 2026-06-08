@@ -25,8 +25,13 @@ import {
   Upload,
   UserCheck,
   Shield,
+  Eye,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import * as React from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { type ColumnFiltersState } from "@tanstack/react-table";
 
 // Import modular dialog components
 import { ImportSiswaDialog } from "./components/ImportSiswaDialog";
@@ -34,6 +39,12 @@ import { TambahSiswaDialog } from "./components/TambahSiswaDialog";
 import { TambahWaliDialog } from "./components/TambahWaliDialog";
 import { TambahBkDialog } from "./components/TambahBkDialog";
 import { TambahKepsekDialog } from "./components/TambahKepsekDialog";
+import { EditSiswaDialog } from "./components/EditSiswaDialog";
+import { EditWaliDialog } from "./components/EditWaliDialog";
+import { EditBkDialog } from "./components/EditBkDialog";
+import { EditKepsekDialog } from "./components/EditKepsekDialog";
+import { ViewAccountDialog } from "./components/ViewAccountDialog";
+import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
 
 // Reusable status badge renderer
 const renderStatusBadge = (status: string) => {
@@ -51,102 +62,7 @@ const renderStatusBadge = (status: string) => {
   );
 };
 
-// Columns for each DataTable
-const studentColumns = [
-  {
-    accessorKey: "nisn",
-    header: "NISN",
-  },
-  {
-    accessorKey: "name",
-    header: "Nama Siswa",
-  },
-  {
-    accessorKey: "class",
-    header: "Kelas",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Tanggal Dibuat",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }: any) => renderStatusBadge(row.getValue("status")),
-  },
-];
-
-const waliColumns = [
-  {
-    accessorKey: "nip",
-    header: "NIP",
-  },
-  {
-    accessorKey: "name",
-    header: "Nama Guru",
-  },
-  {
-    accessorKey: "homeroomClass",
-    header: "Wali Kelas",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Tanggal Dibuat",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }: any) => renderStatusBadge(row.getValue("status")),
-  },
-];
-
-const bkColumns = [
-  {
-    accessorKey: "nip",
-    header: "NIP",
-  },
-  {
-    accessorKey: "name",
-    header: "Nama Guru BK",
-  },
-  {
-    accessorKey: "targetGroup",
-    header: "Binaan Kelas",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Tanggal Dibuat",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }: any) => renderStatusBadge(row.getValue("status")),
-  },
-];
-
-const kepsekColumns = [
-  {
-    accessorKey: "nip",
-    header: "NIP",
-  },
-  {
-    accessorKey: "name",
-    header: "Nama Kepala Sekolah",
-  },
-  {
-    accessorKey: "title",
-    header: "Jabatan",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Tanggal Dibuat",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }: any) => renderStatusBadge(row.getValue("status")),
-  },
-];
+// Columns are now defined inside the Page component to allow state-based row actions
 
 // Initial mock data
 const studentNames = [
@@ -219,8 +135,14 @@ const studentFilterColumns: FilterColumn[] = [
 ];
 
 export default function Page() {
-  const [activeTab, setActiveTab] = React.useState("siswa");
+  return (
+    <React.Suspense fallback={<div className="p-8 text-center text-sm text-muted-foreground animate-pulse">Memuat kelola akun...</div>}>
+      <AccountManagement />
+    </React.Suspense>
+  );
+}
 
+function AccountManagement() {
   // Local state for tables
   const [students, setStudents] = React.useState(initialStudentData);
   const [walis, setWalis] = React.useState(initialWaliData);
@@ -234,7 +156,329 @@ export default function Page() {
   const [isTambahBkOpen, setIsTambahBkOpen] = React.useState(false);
   const [isTambahKepsekOpen, setIsTambahKepsekOpen] = React.useState(false);
 
+  // Action states
+  const [selectedItem, setSelectedItem] = React.useState<any>(null);
+  const [activeRole, setActiveRole] = React.useState<"siswa" | "wali" | "bk" | "kepsek" | null>(null);
+  const [isViewOpen, setIsViewOpen] = React.useState(false);
+  const [isEditOpen, setIsEditOpen] = React.useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const activeTab = searchParams.get("tab") || "siswa";
+  const searchQuery = searchParams.get("search") || "";
+  const classQuery = searchParams.get("class") || "";
+
   const todayDate = "2026-06-08";
+
+  const updateQueryParams = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === "") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const handleTabChange = (tab: string) => {
+    updateQueryParams({ tab, search: null, class: null });
+  };
+
+  const handleGlobalFilterChange = (value: string) => {
+    updateQueryParams({ search: value });
+  };
+
+  const handleSiswaColumnFiltersChange = (updaterOrValue: any) => {
+    const currentFilters: ColumnFiltersState = classQuery ? [{ id: "class", value: classQuery }] : [];
+    const nextFilters = typeof updaterOrValue === "function" 
+      ? updaterOrValue(currentFilters) 
+      : updaterOrValue;
+
+    const classVal = nextFilters.find((f: any) => f.id === "class")?.value || "";
+    updateQueryParams({ class: classVal || null });
+  };
+
+  const handleSiswaReset = () => {
+    updateQueryParams({ search: null, class: null });
+  };
+
+  const handleGenericReset = () => {
+    updateQueryParams({ search: null });
+  };
+
+  const siswaColumnFilters = React.useMemo<ColumnFiltersState>(() => {
+    return classQuery ? [{ id: "class", value: classQuery }] : [];
+  }, [classQuery]);
+
+  const handleAction = (action: "view" | "edit" | "delete", role: "siswa" | "wali" | "bk" | "kepsek", item: any) => {
+    setSelectedItem(item);
+    setActiveRole(role);
+    if (action === "view") setIsViewOpen(true);
+    if (action === "edit") setIsEditOpen(true);
+    if (action === "delete") setIsDeleteOpen(true);
+  };
+
+  const handleSaveEdit = (updatedData: any) => {
+    if (activeRole === "siswa") {
+      setStudents((prev) =>
+        prev.map((s) => (s.nisn === selectedItem.nisn ? { ...s, ...updatedData } : s))
+      );
+    } else if (activeRole === "wali") {
+      setWalis((prev) =>
+        prev.map((w) => (w.nip === selectedItem.nip ? { ...w, ...updatedData } : w))
+      );
+    } else if (activeRole === "bk") {
+      setBks((prev) =>
+        prev.map((b) => (b.nip === selectedItem.nip ? { ...b, ...updatedData } : b))
+      );
+    } else if (activeRole === "kepsek") {
+      setKepseks((prev) =>
+        prev.map((k) => (k.nip === selectedItem.nip ? { ...k, ...updatedData } : k))
+      );
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (activeRole === "siswa") {
+      setStudents((prev) => prev.filter((s) => s.nisn !== selectedItem.nisn));
+    } else if (activeRole === "wali") {
+      setWalis((prev) => prev.filter((w) => w.nip !== selectedItem.nip));
+    } else if (activeRole === "bk") {
+      setBks((prev) => prev.filter((b) => b.nip !== selectedItem.nip));
+    } else if (activeRole === "kepsek") {
+      setKepseks((prev) => prev.filter((k) => k.nip !== selectedItem.nip));
+    }
+  };
+
+  // Memoized columns containing actions
+  const studentColumns = React.useMemo(() => [
+    {
+      accessorKey: "nisn",
+      header: "NISN",
+    },
+    {
+      accessorKey: "name",
+      header: "Nama Siswa",
+    },
+    {
+      accessorKey: "class",
+      header: "Kelas",
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Tanggal Dibuat",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }: any) => renderStatusBadge(row.getValue("status")),
+    },
+    {
+      id: "actions",
+      header: "Aksi",
+      cell: ({ row }: any) => (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer"
+            onClick={() => handleAction("view", "siswa", row.original)}
+          >
+            <Eye className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer text-primary"
+            onClick={() => handleAction("edit", "siswa", row.original)}
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer text-destructive"
+            onClick={() => handleAction("delete", "siswa", row.original)}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ], []);
+
+  const waliColumns = React.useMemo(() => [
+    {
+      accessorKey: "nip",
+      header: "NIP",
+    },
+    {
+      accessorKey: "name",
+      header: "Nama Guru",
+    },
+    {
+      accessorKey: "homeroomClass",
+      header: "Wali Kelas",
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Tanggal Dibuat",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }: any) => renderStatusBadge(row.getValue("status")),
+    },
+    {
+      id: "actions",
+      header: "Aksi",
+      cell: ({ row }: any) => (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer"
+            onClick={() => handleAction("view", "wali", row.original)}
+          >
+            <Eye className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer text-primary"
+            onClick={() => handleAction("edit", "wali", row.original)}
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer text-destructive"
+            onClick={() => handleAction("delete", "wali", row.original)}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ], []);
+
+  const bkColumns = React.useMemo(() => [
+    {
+      accessorKey: "nip",
+      header: "NIP",
+    },
+    {
+      accessorKey: "name",
+      header: "Nama Guru BK",
+    },
+    {
+      accessorKey: "targetGroup",
+      header: "Binaan Kelas",
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Tanggal Dibuat",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }: any) => renderStatusBadge(row.getValue("status")),
+    },
+    {
+      id: "actions",
+      header: "Aksi",
+      cell: ({ row }: any) => (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer"
+            onClick={() => handleAction("view", "bk", row.original)}
+          >
+            <Eye className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer text-primary"
+            onClick={() => handleAction("edit", "bk", row.original)}
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer text-destructive"
+            onClick={() => handleAction("delete", "bk", row.original)}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ], []);
+
+  const kepsekColumns = React.useMemo(() => [
+    {
+      accessorKey: "nip",
+      header: "NIP",
+    },
+    {
+      accessorKey: "name",
+      header: "Nama Kepala Sekolah",
+    },
+    {
+      accessorKey: "title",
+      header: "Jabatan",
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Tanggal Dibuat",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }: any) => renderStatusBadge(row.getValue("status")),
+    },
+    {
+      id: "actions",
+      header: "Aksi",
+      cell: ({ row }: any) => (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer"
+            onClick={() => handleAction("view", "kepsek", row.original)}
+          >
+            <Eye className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer text-primary"
+            onClick={() => handleAction("edit", "kepsek", row.original)}
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 cursor-pointer text-destructive"
+            onClick={() => handleAction("delete", "kepsek", row.original)}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ], []);
 
   // Calculate dynamic accounts created today
   const getTodayCount = () => {
@@ -325,7 +569,7 @@ export default function Page() {
         <DashboardPanel items={statItems} gridCols="grid-cols-1 md:grid-cols-2" />
 
         {/* Interactive tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-4">
           <TabsList className="grid grid-cols-2 sm:grid-cols-4 md:flex w-full bg-muted/50 dark:bg-muted/10 p-1 rounded-lg gap-1 h-auto! md:h-9! border">
             <TabsTrigger value="siswa" className="rounded-lg px-1.5 py-1 text-sm font-medium justify-center h-9 md:h-auto">
               Akun Siswa
@@ -363,6 +607,11 @@ export default function Page() {
               filterColumns={studentFilterColumns}
               actionButton={ActionDropdown}
               defaultPageSize={5}
+              globalFilter={searchQuery}
+              onGlobalFilterChange={handleGlobalFilterChange}
+              columnFilters={siswaColumnFilters}
+              onColumnFiltersChange={handleSiswaColumnFiltersChange}
+              onReset={handleSiswaReset}
             />
           </TabsContent>
 
@@ -375,6 +624,9 @@ export default function Page() {
               searchPlaceholder="Cari nama guru..."
               actionButton={ActionDropdown}
               defaultPageSize={5}
+              globalFilter={searchQuery}
+              onGlobalFilterChange={handleGlobalFilterChange}
+              onReset={handleGenericReset}
             />
           </TabsContent>
 
@@ -387,6 +639,9 @@ export default function Page() {
               searchPlaceholder="Cari nama guru BK..."
               actionButton={ActionDropdown}
               defaultPageSize={5}
+              globalFilter={searchQuery}
+              onGlobalFilterChange={handleGlobalFilterChange}
+              onReset={handleGenericReset}
             />
           </TabsContent>
 
@@ -399,6 +654,9 @@ export default function Page() {
               searchPlaceholder="Cari kepala sekolah..."
               actionButton={ActionDropdown}
               defaultPageSize={5}
+              globalFilter={searchQuery}
+              onGlobalFilterChange={handleGlobalFilterChange}
+              onReset={handleGenericReset}
             />
           </TabsContent>
         </Tabs>
@@ -475,6 +733,62 @@ export default function Page() {
           ])
         }
       />
+
+      {/* ─── ACTION DIALOGS ─────────────────────────────────────────────── */}
+
+      <ViewAccountDialog
+        open={isViewOpen}
+        onOpenChange={setIsViewOpen}
+        type={activeRole}
+        data={selectedItem}
+      />
+
+      <DeleteConfirmDialog
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        onConfirm={handleConfirmDelete}
+        itemName={selectedItem?.name}
+        title={`Hapus Akun ${activeRole === "siswa" ? "Siswa" : activeRole === "wali" ? "Guru Wali" : activeRole === "bk" ? "Guru BK" : "Kepala Sekolah"}`}
+        description={`Apakah Anda yakin ingin menghapus akun ${selectedItem?.name}? Tindakan ini tidak dapat dibatalkan.`}
+      />
+
+      {activeRole === "siswa" && (
+        <EditSiswaDialog
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+          student={selectedItem}
+          walis={walis}
+          bks={bks}
+          onSave={handleSaveEdit}
+        />
+      )}
+
+      {activeRole === "wali" && (
+        <EditWaliDialog
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+          wali={selectedItem}
+          onSave={handleSaveEdit}
+        />
+      )}
+
+      {activeRole === "bk" && (
+        <EditBkDialog
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+          bk={selectedItem}
+          onSave={handleSaveEdit}
+        />
+      )}
+
+      {activeRole === "kepsek" && (
+        <EditKepsekDialog
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+          kepsek={selectedItem}
+          onSave={handleSaveEdit}
+        />
+      )}
     </div>
   );
 }
