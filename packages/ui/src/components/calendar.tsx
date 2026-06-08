@@ -11,7 +11,7 @@ import {
 } from "react-day-picker";
 
 import { cn } from "@appiks/ui/utils/cn";
-import { Button, buttonVariants } from "@/components/button";
+import { Button, buttonVariants } from "./button";
 
 function Calendar({
   className,
@@ -128,7 +128,7 @@ function Calendar({
         ),
         hidden: cn("invisible", defaultClassNames.hidden),
         ...classNames,
-      }}
+      } as any}
       components={{
         Root: ({ className, rootRef, ...props }) => {
           return (

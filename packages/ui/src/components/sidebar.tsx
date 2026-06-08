@@ -5,8 +5,8 @@ import { Slot } from "radix-ui";
 
 import { useIsMobile } from "@appiks/ui/hooks/use-mobile";
 import { cn } from "@appiks/ui/utils/cn";
-import { Button } from "@/components/button";
-import { Input } from "@/components/Iinput";
+import { Button } from "./button";
+import { Input } from "./input";
 import { Separator } from "@appiks/ui/components/separator";
 import {
   Sheet,
@@ -15,7 +15,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@appiks/ui/components/sheet";
-import { Skeleton } from "@/components/skeleton";
+import { Skeleton } from "./skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -265,7 +265,7 @@ function SidebarTrigger({
       variant="ghost"
       size="icon"
       className={cn("size-7", className)}
-      onClick={(event) => {
+      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
         toggleSidebar();
       }}
