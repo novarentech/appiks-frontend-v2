@@ -167,12 +167,14 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     avatar?: string;
   };
   logoutUrl: string;
+  profileUrl?: string;
 }
 
 export function AppSidebar({
   showTeamSwitcher = false,
   user,
   logoutUrl,
+  profileUrl,
   ...props
 }: AppSidebarProps) {
   const sidebarUser = user || data.user;
@@ -205,7 +207,7 @@ export function AppSidebar({
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={sidebarUser} logoutUrl={logoutUrl} />
+        <NavUser user={sidebarUser} logoutUrl={logoutUrl} profileUrl={profileUrl} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

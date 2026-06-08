@@ -66,3 +66,4 @@ export * from "./components/ui/tooltip";
 
 // ─── Layout Components ───────────────────────────────────────────────────────────
 export * from "./components/layout/sidebar/app-sidebar";
+export * from "./components/ui/theme-provider";

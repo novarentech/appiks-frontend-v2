@@ -1,4 +1,5 @@
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut, Moon, Sun, User } from "lucide-react";
+import { useTheme } from "next-themes";
 
 import { Avatar, AvatarFallback } from "../../ui/avatar";
 import {
@@ -39,6 +40,7 @@ function formatRole(role: string): string {
 export function NavUser({
   user,
   logoutUrl,
+  profileUrl = "/dashboard/profile",
 }: {
   user: {
     name: string;
@@ -46,8 +48,10 @@ export function NavUser({
     avatar?: string;
   };
   logoutUrl: string;
+  profileUrl?: string;
 }) {
   const { isMobile } = useSidebar();
+  const { theme, setTheme } = useTheme();
   const formattedRole = formatRole(user.role);
   const initials = getInitials(user.name);
 
@@ -87,6 +91,26 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <a href={profileUrl}>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+              {theme === "dark" ? (
+                <>
+                  <Sun className="mr-2 h-4 w-4" />
+                  Light Mode
+                </>
+              ) : (
+                <>
+                  <Moon className="mr-2 h-4 w-4" />
+                  Dark Mode
+                </>
+              )}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => { window.location.href = logoutUrl; }}>
               <LogOut className="mr-2 h-4 w-4" />
