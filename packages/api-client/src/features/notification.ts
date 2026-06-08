@@ -12,66 +12,48 @@ export const notificationKeys = {
 };
 
 // ─── Types ─────────────────────────────────────────────────────────────────
+export interface SharingNotificationUser {
+  id: number;
+  name: string;
+  phone: string | null;
+  username: string;
+  identifier: string | null;
+  verified: boolean;
+  role: string;
+  created_at: string;
+  deleted_at: string | null;
+}
+
 export interface SharingNotification {
-  id: 0;
-  user_id: 0;
-  title: "string";
-  description: "string";
-  reply: "string";
-  replied_at: "string";
-  replied_by: "string";
-  priority: "string";
-  created_at: "2019-08-24T14:15:22Z";
-  deleted_at: "2019-08-24T14:15:22Z";
-  user: {
-    id: 0;
-    name: "string";
-    phone: "string";
-    username: "string";
-    identifier: "string";
-    verified: true;
-    role: "string";
-    created_at: "2019-08-24T14:15:22Z";
-    deleted_at: "2019-08-24T14:15:22Z";
-  };
+  id: number;
+  user_id: number;
+  title: string;
+  description: string;
+  reply: string | null;
+  replied_at: string | null;
+  replied_by: string | null;
+  priority: string;
+  created_at: string;
+  deleted_at: string | null;
+  user: SharingNotificationUser;
 }
 
 export interface ReportNotification {
-  id: 0;
-  user_id: 0;
-  counselor_id: 0;
-  topic: "string";
-  room: "string";
-  date: "string";
-  time: "string";
-  status: "string";
-  priority: "string";
-  notes: "string";
-  result: "string";
-  created_at: "2019-08-24T14:15:22Z";
-  deleted_at: "2019-08-24T14:15:22Z";
-  user: {
-    id: 0;
-    name: "string";
-    phone: "string";
-    username: "string";
-    identifier: "string";
-    verified: true;
-    role: "string";
-    created_at: "2019-08-24T14:15:22Z";
-    deleted_at: "2019-08-24T14:15:22Z";
-  };
-  counselor: {
-    id: 0;
-    name: "string";
-    phone: "string";
-    username: "string";
-    identifier: "string";
-    verified: true;
-    role: "string";
-    created_at: "2019-08-24T14:15:22Z";
-    deleted_at: "2019-08-24T14:15:22Z";
-  };
+  id: number;
+  user_id: number;
+  counselor_id: number;
+  topic: string;
+  room: string | null;
+  date: string;
+  time: string;
+  status: string;
+  priority: string;
+  notes: string | null;
+  result: string | null;
+  created_at: string;
+  deleted_at: string | null;
+  user: SharingNotificationUser;
+  counselor: SharingNotificationUser;
 }
 
 // ─── Custom Hooks ──────────────────────────────────────────────────────────
