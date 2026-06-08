@@ -70,3 +70,4 @@ export * from "./components/ui/theme-provider";
 export * from "./components/layout/header/dashboard-header";
 export * from "./components/layout/panel/dashboard-panel";
 export * from "./components/layout/loading/dashboard-loading-skeleton";
+export * from "./components/layout/loading/dashboard-subpage-loading-skeleton";

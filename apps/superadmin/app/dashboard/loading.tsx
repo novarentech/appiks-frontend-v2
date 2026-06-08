@@ -1,5 +1,5 @@
-import { DashboardLoadingSkeleton } from "@appiks/ui";
+import { DashboardSubpageLoadingSkeleton } from "@appiks/ui";
 
 export default function Loading() {
-  return <DashboardLoadingSkeleton />;
+  return <DashboardSubpageLoadingSkeleton />;
 }
