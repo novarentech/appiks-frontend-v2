@@ -1,19 +1,16 @@
-"use client";
-
-import { useSession } from "next-auth/react";
 import { baseApiFetch, type FetchOptions } from "./fetcher";
 
 /**
- * Hook `useApiClient`
- * Hook ini dapat digunakan di Client Components mana pun.
- * Secara otomatis mengambil session dari next-auth dan menyematkan token.
+ * Utilitas API Client khusus untuk digunakan di Server Components / Server Actions.
+ * Mengingat setiap aplikasi (school, student, dll) memiliki auth() setup yang berbeda,
+ * Server Component di aplikasi yang bersangkutan HARUS memberikan token-nya secara eksplisit.
+ * 
+ * Contoh Penggunaan:
+ *   const session = await auth();
+ *   const api = getServerApiClient(session?.user?.token);
+ *   const data = await api.get('/users');
  */
-export function useApiClient() {
-  const { data: session } = useSession();
-
-  // @ts-expect-error CustomSession type extends session
-  const token = session?.user?.token as string | undefined;
-
+export function getServerApiClient(token?: string) {
   const apiGet = <T>(path: string, options?: Omit<FetchOptions, "method" | "body">) =>
     baseApiFetch<T>(path, { ...options, method: "GET", token });
 
@@ -50,6 +47,5 @@ export function useApiClient() {
     apiPut,
     apiPatch,
     apiDelete,
-    token,
   };
 }
