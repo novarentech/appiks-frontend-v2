@@ -5,10 +5,10 @@ export * from "./utils/cn";
 export * from "./stores/useSidebarStore";
 
 // ─── Components ─────────────────────────────────────────────────────────────────
-export * from "./components/Button";
-export * from "./components/Input";
-export * from "./components/Card";
-export * from "./components/DataTable";
-export * from "./components/Skeleton";
+export * from "./components/button";
+export * from "./components/input";
+export * from "./components/card";
+export * from "./components/dataTable";
+export * from "./components/skeleton";
 export * from "./components/form";
 export * from "./components/label";
