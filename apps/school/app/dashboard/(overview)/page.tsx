@@ -1,8 +1,14 @@
 "use client";
 
-import { DashboardHeader, DashboardPanel, DataTable, Button, type FilterColumn } from "@appiks/ui";
+import {
+  DashboardHeader,
+  DashboardPanel,
+  DataTable,
+  Button,
+  type FilterColumn,
+} from "@appiks/ui";
 import { GraduationCap, BookOpen, Users, FileText, Plus } from "lucide-react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useQueryParams } from "@appiks/ui/hooks/useQueryParams";
 import { type ColumnFiltersState } from "@tanstack/react-table";
 import * as React from "react";
 
@@ -25,17 +31,18 @@ const columns = [
     cell: ({ row }: any) => {
       const status = row.getValue("status") as string;
       const statusStyles: Record<string, string> = {
-        "Selesai":
+        Selesai:
           "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-500/20",
         "Sedang Berlangsung":
           "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-blue-500/20",
-        "Menunggu":
+        Menunggu:
           "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border-amber-500/20",
       };
       return (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-            statusStyles[status] || "bg-muted text-muted-foreground border-transparent"
+            statusStyles[status] ||
+            "bg-muted text-muted-foreground border-transparent"
           }`}
         >
           {status}
@@ -131,16 +138,20 @@ const filterColumns: FilterColumn[] = [
 
 export default function Page() {
   return (
-    <React.Suspense fallback={<div className="p-8 text-center text-sm text-muted-foreground animate-pulse">Memuat dashboard...</div>}>
+    <React.Suspense
+      fallback={
+        <div className="p-8 text-center text-sm text-muted-foreground animate-pulse">
+          Memuat dashboard...
+        </div>
+      }
+    >
       <DashboardOverview />
     </React.Suspense>
   );
 }
 
 function DashboardOverview() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { updateQueryParams, searchParams } = useQueryParams();
 
   // Read URL search params
   const searchQuery = searchParams.get("search") || "";
@@ -159,30 +170,20 @@ function DashboardOverview() {
     return filters;
   }, [statusQuery, classQuery]);
 
-  // Sync to URL
-  const updateQueryParams = (updates: Record<string, string | null>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === "") {
-        params.delete(key);
-      } else {
-        params.set(key, value);
-      }
-    });
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-
   const handleGlobalFilterChange = (value: string) => {
     updateQueryParams({ search: value });
   };
 
   const handleColumnFiltersChange = (updaterOrValue: any) => {
-    const nextFilters = typeof updaterOrValue === "function" 
-      ? updaterOrValue(columnFilters) 
-      : updaterOrValue;
+    const nextFilters =
+      typeof updaterOrValue === "function"
+        ? updaterOrValue(columnFilters)
+        : updaterOrValue;
 
-    const statusVal = nextFilters.find((f: any) => f.id === "status")?.value || "";
-    const classVal = nextFilters.find((f: any) => f.id === "class")?.value || "";
+    const statusVal =
+      nextFilters.find((f: any) => f.id === "status")?.value || "";
+    const classVal =
+      nextFilters.find((f: any) => f.id === "class")?.value || "";
 
     updateQueryParams({
       status: statusVal || null,
@@ -244,7 +245,8 @@ function DashboardOverview() {
               Aktivitas Konseling Terbaru
             </h2>
             <p className="text-sm text-muted-foreground">
-              Daftar rujukan dan kasus bimbingan konseling siswa yang aktif atau baru diselesaikan.
+              Daftar rujukan dan kasus bimbingan konseling siswa yang aktif atau
+              baru diselesaikan.
             </p>
           </div>
           <DataTable

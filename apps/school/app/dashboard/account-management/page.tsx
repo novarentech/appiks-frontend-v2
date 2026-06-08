@@ -30,7 +30,7 @@ import {
   Trash2,
 } from "lucide-react";
 import * as React from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useQueryParams } from "@appiks/ui/hooks/useQueryParams";
 import { type ColumnFiltersState } from "@tanstack/react-table";
 
 // Import modular dialog components
@@ -163,27 +163,13 @@ function AccountManagement() {
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { updateQueryParams, searchParams } = useQueryParams();
 
   const activeTab = searchParams.get("tab") || "siswa";
   const searchQuery = searchParams.get("search") || "";
   const classQuery = searchParams.get("class") || "";
 
   const todayDate = "2026-06-08";
-
-  const updateQueryParams = (updates: Record<string, string | null>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === "") {
-        params.delete(key);
-      } else {
-        params.set(key, value);
-      }
-    });
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  };
 
   const handleTabChange = (tab: string) => {
     updateQueryParams({ tab, search: null, class: null });

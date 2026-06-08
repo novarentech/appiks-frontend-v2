@@ -16,7 +16,6 @@ import {
   Trash2,
 } from "lucide-react";
 import * as React from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { type ColumnFiltersState } from "@tanstack/react-table";
 
 // Import dialogs
@@ -24,6 +23,7 @@ import { TambahKelasDialog } from "./components/TambahKelasDialog";
 import { EditKelasDialog } from "./components/EditKelasDialog";
 import { ViewKelasDialog } from "./components/ViewKelasDialog";
 import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
+import { useQueryParams } from "@appiks/ui/hooks/useQueryParams";
 
 const initialClassData = [
   {
@@ -114,24 +114,10 @@ function ClassDataContent() {
   // Selected item tracker
   const [selectedClass, setSelectedClass] = React.useState<any>(null);
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { updateQueryParams, searchParams } = useQueryParams();
 
   const searchQuery = searchParams.get("search") || "";
   const gradeQuery = searchParams.get("grade") || "";
-
-  const updateQueryParams = (updates: Record<string, string | null>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === "") {
-        params.delete(key);
-      } else {
-        params.set(key, value);
-      }
-    });
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  };
 
   const handleGlobalFilterChange = (value: string) => {
     updateQueryParams({ search: value });
