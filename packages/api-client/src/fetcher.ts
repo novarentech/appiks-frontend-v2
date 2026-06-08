@@ -1,48 +1,45 @@
+import axios, { type AxiosRequestConfig } from "axios";
 import type { ApiResponse } from "@appiks/types";
 
 const API_BASE_URL =
   process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
-export interface FetchOptions extends RequestInit {
+export interface FetchOptions extends AxiosRequestConfig {
   token?: string;
-  params?: Record<string, string>;
 }
 
 /**
- * Fungsi utilitas internal untuk melakukan pemanggilan API dengan Native Fetch.
- * Akan menangani penyisipan header Authorization jika token tersedia,
- * dan juga mendukung query params.
+ * Fungsi utilitas internal untuk melakukan pemanggilan API dengan Axios.
+ * Akan menangani penyisipan header Authorization jika token tersedia.
  */
 export async function baseApiFetch<T>(
   path: string,
   options: FetchOptions = {}
 ): Promise<ApiResponse<T>> {
-  const { token, params, ...rest } = options;
+  const { token, headers, ...rest } = options;
 
-  const headers: HeadersInit = {
+  const requestHeaders = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(rest.headers ?? {}),
+    ...(headers ?? {}),
   };
 
-  // Bangun URL dengan path
-  let urlStr = `${API_BASE_URL}${path}`;
+  try {
+    const response = await axios<ApiResponse<T>>({
+      url: path,
+      baseURL: API_BASE_URL,
+      headers: requestHeaders,
+      ...rest,
+    });
 
-  // Tambahkan query parameter jika ada
-  if (params && Object.keys(params).length > 0) {
-    const searchParams = new URLSearchParams(params);
-    urlStr += `?${searchParams.toString()}`;
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const data = error.response?.data;
+      const message = (data as any)?.message || error.message;
+      throw new Error(`API error ${status ?? "unknown"}: ${message}`);
+    }
+    throw error;
   }
-
-  const res = await fetch(urlStr, {
-    ...rest,
-    headers,
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`API error ${res.status}: ${errorText}`);
-  }
-
-  return res.json();
 }

@@ -11,34 +11,34 @@ import { baseApiFetch, type FetchOptions } from "./fetcher";
  *   const data = await api.get('/users');
  */
 export function getServerApiClient(token?: string) {
-  const apiGet = <T>(path: string, options?: Omit<FetchOptions, "method" | "body">) =>
+  const apiGet = <T>(path: string, options?: Omit<FetchOptions, "method" | "data">) =>
     baseApiFetch<T>(path, { ...options, method: "GET", token });
 
-  const apiPost = <T>(path: string, body: unknown, options?: Omit<FetchOptions, "method">) =>
+  const apiPost = <T>(path: string, data: unknown, options?: Omit<FetchOptions, "method" | "data">) =>
     baseApiFetch<T>(path, {
       ...options,
       method: "POST",
-      body: JSON.stringify(body),
+      data,
       token,
     });
 
-  const apiPut = <T>(path: string, body: unknown, options?: Omit<FetchOptions, "method">) =>
+  const apiPut = <T>(path: string, data: unknown, options?: Omit<FetchOptions, "method" | "data">) =>
     baseApiFetch<T>(path, {
       ...options,
       method: "PUT",
-      body: JSON.stringify(body),
+      data,
       token,
     });
 
-  const apiPatch = <T>(path: string, body: unknown, options?: Omit<FetchOptions, "method">) =>
+  const apiPatch = <T>(path: string, data: unknown, options?: Omit<FetchOptions, "method" | "data">) =>
     baseApiFetch<T>(path, {
       ...options,
       method: "PATCH",
-      body: JSON.stringify(body),
+      data,
       token,
     });
 
-  const apiDelete = <T>(path: string, options?: Omit<FetchOptions, "method" | "body">) =>
+  const apiDelete = <T>(path: string, options?: Omit<FetchOptions, "method" | "data">) =>
     baseApiFetch<T>(path, { ...options, method: "DELETE", token });
 
   return {
