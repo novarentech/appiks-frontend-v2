@@ -6,9 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput, ROLE_REDIRECT_MAP, type UserRole } from "@appiks/types";
 import { Button, Input, Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@appiks/ui";
+import { toast } from "sonner";
 
 export default function LoginForm() {
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginInput>({
@@ -18,7 +18,6 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
-    setError(null);
 
     try {
       const result = await signIn("credentials", {
@@ -28,7 +27,7 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        setError("Username atau password salah.");
+        toast.error("Username atau password salah.");
         return;
       }
 
@@ -40,10 +39,10 @@ export default function LoginForm() {
       if (role && ROLE_REDIRECT_MAP[role]) {
         window.location.assign(ROLE_REDIRECT_MAP[role]);
       } else {
-        setError("Role tidak dikenali. Hubungi administrator.");
+        toast.error("Role tidak dikenali. Hubungi administrator.");
       }
     } catch {
-      setError("Terjadi kesalahan. Coba lagi.");
+      toast.error("Terjadi kesalahan. Coba lagi.");
     } finally {
       setIsLoading(false);
     }
@@ -64,12 +63,6 @@ export default function LoginForm() {
               Isi data dibawah ini untuk masuk ke akun Anda
             </p>
           </div>
-
-          {error && (
-            <div className="p-3 text-sm text-destructive bg-destructive/15 border border-destructive/20 rounded-md">
-              {error}
-            </div>
-          )}
 
           <div className="space-y-4">
             <FormField
