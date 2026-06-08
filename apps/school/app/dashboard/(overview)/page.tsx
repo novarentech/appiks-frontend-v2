@@ -7,10 +7,14 @@ import {
   Button,
   type FilterColumn,
 } from "@appiks/ui";
-import { GraduationCap, BookOpen, Users, FileText, Plus } from "lucide-react";
+import { GraduationCap, BookOpen, Users, FileText, Plus, Calendar } from "lucide-react";
 import { useQueryParams } from "@appiks/ui/hooks/useQueryParams";
 import { type ColumnFiltersState } from "@tanstack/react-table";
 import * as React from "react";
+
+// Import custom cards
+import { NewUsersCard } from "./components/NewUsersCard";
+import { NewContentCard } from "./components/NewContentCard";
 
 const columns = [
   {
@@ -136,6 +140,18 @@ const filterColumns: FilterColumn[] = [
   },
 ];
 
+const newUsers = [
+  { name: "Ahmad Subarjo", idNumber: "0082736151", role: "Siswa", joinedAt: "Hari ini" },
+  { name: "Ibu Sri Wahyuni, S.Psi", idNumber: "198204222008012001", role: "Guru BK", joinedAt: "Kemarin" },
+  { name: "Bapak Haryono, S.Pd", idNumber: "198503122010121002", role: "Guru Wali", joinedAt: "2 hari lalu" },
+];
+
+const newContent = [
+  { title: "Mengatasi Kecemasan Menjelang Ujian Akhir", type: "Article", categoryOrAuthor: "Kesehatan Mental", createdAt: "Hari ini" },
+  { title: "Panduan Meditasi 5 Menit untuk Pemula", type: "Video", categoryOrAuthor: "https://youtube.com/...", createdAt: "Kemarin" },
+  { title: "Kesehatan mental Anda adalah prioritas utama, bukan pilihan.", type: "Quotes", categoryOrAuthor: "Anonim", createdAt: "3 hari lalu" },
+];
+
 export default function Page() {
   return (
     <React.Suspense
@@ -201,30 +217,23 @@ function DashboardOverview() {
 
   const statItems = [
     {
-      icon: GraduationCap,
-      label: "Total Siswa",
-      value: 320,
+      icon: Users,
+      label: "TOTAL PENGGUNA",
+      value: 42,
       bgColor: "bg-blue-500/10 dark:bg-blue-500/20",
       textColor: "text-blue-600 dark:text-blue-400",
     },
     {
-      icon: BookOpen,
-      label: "Jumlah Kelas",
-      value: 12,
+      icon: FileText,
+      label: "TOTAL KONTEN",
+      value: 40,
       bgColor: "bg-amber-500/10 dark:bg-amber-500/20",
       textColor: "text-amber-600 dark:text-amber-400",
     },
     {
-      icon: Users,
-      label: "Guru & Staf",
-      value: 45,
-      bgColor: "bg-indigo-500/10 dark:bg-indigo-500/20",
-      textColor: "text-indigo-600 dark:text-indigo-400",
-    },
-    {
-      icon: FileText,
-      label: "Kasus BK Aktif",
-      value: 3,
+      icon: Calendar,
+      label: "KONTEN HARI INI",
+      value: 0,
       bgColor: "bg-emerald-500/10 dark:bg-emerald-500/20",
       textColor: "text-emerald-600 dark:text-emerald-400",
     },
@@ -237,37 +246,12 @@ function DashboardOverview() {
         description="Ringkasan data siswa, staf pengajar, dan konseling bimbingan."
       />
       <div className="px-6 space-y-6">
-        <DashboardPanel items={statItems} />
+        <DashboardPanel items={statItems} gridCols="grid-cols-1 md:grid-cols-3" />
 
-        <div className="space-y-4 pt-4 border-border">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold text-foreground tracking-tight">
-              Aktivitas Konseling Terbaru
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Daftar rujukan dan kasus bimbingan konseling siswa yang aktif atau
-              baru diselesaikan.
-            </p>
-          </div>
-          <DataTable
-            columns={columns}
-            data={mockData}
-            searchable
-            searchPlaceholder="Cari siswa atau guru..."
-            filterColumns={filterColumns}
-            actionButton={
-              <Button size="sm" className="gap-1.5">
-                <Plus className="size-4" />
-                Tambah Rujukan
-              </Button>
-            }
-            defaultPageSize={5}
-            globalFilter={searchQuery}
-            onGlobalFilterChange={handleGlobalFilterChange}
-            columnFilters={columnFilters}
-            onColumnFiltersChange={handleColumnFiltersChange}
-            onReset={handleReset}
-          />
+        {/* New Users and New Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+          <NewUsersCard users={newUsers} />
+          <NewContentCard content={newContent} />
         </div>
       </div>
     </div>
