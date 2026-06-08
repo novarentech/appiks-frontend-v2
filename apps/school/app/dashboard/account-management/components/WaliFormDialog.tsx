@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import * as React from "react";
-import { Pencil } from "lucide-react";
+import { Users, Pencil } from "lucide-react";
 
 import {
   Dialog,
@@ -28,7 +28,16 @@ import {
   SelectItem,
 } from "@appiks/ui";
 
-const kepsekSchema = z.object({
+const classes = [
+  "X-A",
+  "X-B",
+  "XI-IPA-1",
+  "XI-IPS-1",
+  "XII-IPA-3",
+  "XII-IPS-2",
+];
+
+const getWaliSchema = (isEdit: boolean) => z.object({
   name: z
     .string()
     .min(1, "Nama lengkap tidak boleh kosong")
@@ -57,20 +66,19 @@ const kepsekSchema = z.object({
     .min(1, "NIP tidak boleh kosong")
     .length(18, "NIP harus tepat 18 digit")
     .regex(/^\d+$/, "NIP hanya boleh berisi angka"),
-  password: z
-    .string()
-    .min(6, "Password minimal terdiri dari 6 karakter")
-    .optional()
-    .or(z.literal("")),
-  title: z.string().min(1, "Jabatan harus dipilih"),
+  password: isEdit
+    ? z.string().min(6, "Password minimal terdiri dari 6 karakter").optional().or(z.literal(""))
+    : z.string().min(1, "Password tidak boleh kosong").min(6, "Password minimal terdiri dari 6 karakter"),
+  homeroomClass: z.string().min(1, "Wali kelas harus dipilih"),
 });
 
-type KepsekFormValues = z.infer<typeof kepsekSchema>;
+type WaliFormValues = z.infer<ReturnType<typeof getWaliSchema>>;
 
-interface EditKepsekDialogProps {
+interface WaliFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  kepsek: any;
+  mode: "add" | "edit";
+  waliData?: any;
   onSave: (data: {
     name: string;
     username: string;
@@ -78,26 +86,30 @@ interface EditKepsekDialogProps {
     phone: string;
     nip: string;
     password?: string;
-    title: string;
+    homeroomClass: string;
   }) => void;
 }
 
-export function EditKepsekDialog({
+export function WaliFormDialog({
   open,
   onOpenChange,
-  kepsek,
+  mode,
+  waliData,
   onSave,
-}: EditKepsekDialogProps) {
-  const form = useForm<KepsekFormValues>({
-    resolver: zodResolver(kepsekSchema),
+}: WaliFormDialogProps) {
+  const isEdit = mode === "edit";
+  const currentSchema = React.useMemo(() => getWaliSchema(isEdit), [isEdit]);
+
+  const form = useForm<WaliFormValues>({
+    resolver: zodResolver(currentSchema) as any,
     defaultValues: {
       name: "",
       username: "",
-      role: "Kepala Sekolah",
+      role: "Guru Wali",
       phone: "",
       nip: "",
       password: "",
-      title: "Kepala Sekolah",
+      homeroomClass: "XI-IPA-1",
     },
   });
 
@@ -107,30 +119,42 @@ export function EditKepsekDialog({
     return phone || "";
   };
 
-  // Pre-fill form when kepsek changes
   React.useEffect(() => {
-    if (open && kepsek) {
-      form.reset({
-        name: kepsek.name || "",
-        username: kepsek.username || kepsek.name?.toLowerCase().replace(/\s+/g, "_") || "",
-        role: kepsek.role || "Kepala Sekolah",
-        phone: stripCountryCode(kepsek.phone),
-        nip: kepsek.nip || "",
-        password: "", // Keep password empty initially
-        title: kepsek.title || "Kepala Sekolah",
-      });
+    if (open) {
+      if (isEdit && waliData) {
+        form.reset({
+          name: waliData.name || "",
+          username: waliData.username || waliData.name?.toLowerCase().replace(/\s+/g, "_") || "",
+          role: waliData.role || "Guru Wali",
+          phone: stripCountryCode(waliData.phone),
+          nip: waliData.nip || "",
+          password: "",
+          homeroomClass: waliData.homeroomClass || "XI-IPA-1",
+        });
+      } else {
+        form.reset({
+          name: "",
+          username: "",
+          role: "Guru Wali",
+          phone: "",
+          nip: "",
+          password: "",
+          homeroomClass: "XI-IPA-1",
+        });
+      }
     }
-  }, [open, kepsek, form]);
+  }, [open, isEdit, waliData, form]);
 
-  const onSubmit = (values: KepsekFormValues) => {
+  const onSubmit = (values: WaliFormValues) => {
     const submitValues = {
       ...values,
       phone: `+62${values.phone}`,
     };
-    if (!values.password) {
-      delete submitValues.password;
+    if (isEdit && !values.password) {
+      delete (submitValues as any).password;
     }
-    onSave(submitValues);
+    onSave(submitValues as any);
+    form.reset();
     onOpenChange(false);
   };
 
@@ -140,19 +164,21 @@ export function EditKepsekDialog({
         <DialogHeader>
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left pb-2">
             <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
-              <Pencil className="size-6" />
+              {isEdit ? <Pencil className="size-6" /> : <Users className="size-6" />}
             </div>
             <div className="space-y-1">
-              <DialogTitle>Edit Akun Kepala Sekolah</DialogTitle>
+              <DialogTitle>{isEdit ? "Edit Akun Guru Wali" : "Tambah Akun Guru Wali"}</DialogTitle>
               <DialogDescription>
-                Perbarui formulir di bawah ini untuk mengubah data akun kepala sekolah.
+                {isEdit
+                  ? "Perbarui formulir di bawah ini untuk mengubah data akun guru wali."
+                  : "Lengkapi formulir di bawah ini untuk membuat akun guru wali baru."}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit as any)}
             className="space-y-4 pt-2"
           >
             {/* Nama Lengkap */}
@@ -206,9 +232,7 @@ export function EditKepsekDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Kepala Sekolah">
-                        Kepala Sekolah
-                      </SelectItem>
+                      <SelectItem value="Guru Wali">Guru Wali</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -252,7 +276,7 @@ export function EditKepsekDialog({
                     <Input
                       placeholder="Masukkan 18 digit NIP..."
                       maxLength={18}
-                      disabled // NIP is primary key and unique
+                      disabled={isEdit}
                       {...field}
                     />
                   </FormControl>
@@ -267,11 +291,11 @@ export function EditKepsekDialog({
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password Baru (Opsional)</FormLabel>
+                  <FormLabel>{isEdit ? "Password Baru (Opsional)" : "Password"}</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Kosongkan jika tidak ingin mengubah..."
+                      placeholder={isEdit ? "Kosongkan jika tidak ingin mengubah..." : "Masukkan password..."}
                       {...field}
                     />
                   </FormControl>
@@ -280,26 +304,25 @@ export function EditKepsekDialog({
               )}
             />
 
-            {/* Jabatan */}
+            {/* Wali Kelas */}
             <FormField
               control={form.control as any}
-              name="title"
+              name="homeroomClass"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Jabatan</FormLabel>
+                  <FormLabel>Wali Kelas</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Pilih Jabatan" />
+                        <SelectValue placeholder="Pilih Kelas" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Kepala Sekolah">
-                        Kepala Sekolah
-                      </SelectItem>
-                      <SelectItem value="Plt. Kepala Sekolah">
-                        Plt. Kepala Sekolah
-                      </SelectItem>
+                    <SelectContent position="popper">
+                      {classes.map((cls) => (
+                        <SelectItem key={cls} value={cls}>
+                          {cls}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -310,12 +333,15 @@ export function EditKepsekDialog({
             <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2 mt-2 sm:mt-0">
               <Button
                 variant="outline"
+                type="button"
                 onClick={() => onOpenChange(false)}
                 className="w-full sm:w-auto"
               >
                 Batal
               </Button>
-              <Button className="w-full sm:w-auto">Simpan Perubahan</Button>
+              <Button type="submit" className="w-full sm:w-auto">
+                {isEdit ? "Simpan Perubahan" : "Simpan"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

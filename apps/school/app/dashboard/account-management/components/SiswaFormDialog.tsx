@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import * as React from "react";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Pencil } from "lucide-react";
 
 import {
   Dialog,
@@ -52,12 +52,14 @@ const siswaSchema = z.object({
 
 type SiswaFormValues = z.infer<typeof siswaSchema>;
 
-interface TambahSiswaDialogProps {
+interface SiswaFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode: "add" | "edit";
+  studentData?: any;
   walis: Array<{ nip: string; name: string }>;
   bks: Array<{ nip: string; name: string }>;
-  onAdd: (data: {
+  onSave: (data: {
     nisn: string;
     name: string;
     class: string;
@@ -67,15 +69,17 @@ interface TambahSiswaDialogProps {
   }) => void;
 }
 
-export function TambahSiswaDialog({
+export function SiswaFormDialog({
   open,
   onOpenChange,
+  mode,
+  studentData,
   walis,
   bks,
-  onAdd,
-}: TambahSiswaDialogProps) {
+  onSave,
+}: SiswaFormDialogProps) {
   const form = useForm<SiswaFormValues>({
-    resolver: zodResolver(siswaSchema),
+    resolver: zodResolver(siswaSchema) as any,
     defaultValues: {
       nisn: "",
       name: "",
@@ -93,30 +97,45 @@ export function TambahSiswaDialog({
     return selectedGrade ? gradeToClassMap[selectedGrade] || [] : [];
   }, [selectedGrade]);
 
-  // Reset the class field when the grade level changes
-  React.useEffect(() => {
-    form.setValue("class", "");
-  }, [selectedGrade, form]);
-
-  // Clean form states when opening
+  // Pre-fill or clean form when open state changes
   React.useEffect(() => {
     if (open) {
-      form.reset({
-        nisn: "",
-        name: "",
-        homeroomTeacher: "",
-        bkTeacher: "",
-        grade: "",
-        class: "",
-      });
+      if (mode === "edit" && studentData) {
+        // Extract grade level from class if not present in studentData
+        let resolvedGrade = studentData.grade || "";
+        if (!resolvedGrade && studentData.class) {
+          if (studentData.class.startsWith("X-")) resolvedGrade = "X";
+          else if (studentData.class.startsWith("XI-")) resolvedGrade = "XI";
+          else if (studentData.class.startsWith("XII-")) resolvedGrade = "XII";
+        }
+
+        form.reset({
+          nisn: studentData.nisn || "",
+          name: studentData.name || "",
+          homeroomTeacher: studentData.homeroomTeacher || "",
+          bkTeacher: studentData.bkTeacher || "",
+          grade: resolvedGrade,
+          class: studentData.class || "",
+        });
+      } else {
+        form.reset({
+          nisn: "",
+          name: "",
+          homeroomTeacher: "",
+          bkTeacher: "",
+          grade: "",
+          class: "",
+        });
+      }
     }
-  }, [open, form]);
+  }, [open, mode, studentData, form]);
 
   const onSubmit = (values: SiswaFormValues) => {
-    onAdd(values);
-    form.reset();
+    onSave(values);
     onOpenChange(false);
   };
+
+  const isEdit = mode === "edit";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -124,24 +143,26 @@ export function TambahSiswaDialog({
         <DialogHeader>
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left pb-2">
             <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
-              <GraduationCap className="size-6" />
+              {isEdit ? <Pencil className="size-6" /> : <GraduationCap className="size-6" />}
             </div>
             <div className="space-y-1">
-              <DialogTitle>Tambah Akun Siswa</DialogTitle>
+              <DialogTitle>{isEdit ? "Edit Akun Siswa" : "Tambah Akun Siswa"}</DialogTitle>
               <DialogDescription>
-                Lengkapi formulir di bawah ini untuk membuat akun siswa baru.
+                {isEdit
+                  ? "Perbarui formulir di bawah ini untuk mengubah data akun siswa."
+                  : "Lengkapi formulir di bawah ini untuk membuat akun siswa baru."}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit as any)}
             className="space-y-4 pt-2"
           >
             {/* Full Name */}
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="name"
               render={({ field }) => (
                 <FormItem>
@@ -159,7 +180,7 @@ export function TambahSiswaDialog({
 
             {/* NISN */}
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="nisn"
               render={({ field }) => (
                 <FormItem>
@@ -168,6 +189,7 @@ export function TambahSiswaDialog({
                     <Input
                       placeholder="Masukkan 10 digit NISN..."
                       maxLength={10}
+                      disabled={isEdit}
                       {...field}
                     />
                   </FormControl>
@@ -178,7 +200,7 @@ export function TambahSiswaDialog({
 
             {/* Homeroom Teacher */}
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="homeroomTeacher"
               render={({ field }) => (
                 <FormItem>
@@ -210,7 +232,7 @@ export function TambahSiswaDialog({
 
             {/* Counselors / Guru BK */}
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="bkTeacher"
               render={({ field }) => (
                 <FormItem>
@@ -244,7 +266,7 @@ export function TambahSiswaDialog({
             <div className="grid grid-cols-2 gap-4">
               {/* Tingkat */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="grade"
                 render={({ field }) => (
                   <FormItem>
@@ -255,7 +277,7 @@ export function TambahSiswaDialog({
                           <SelectValue placeholder="Pilih Tingkat" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         <SelectItem value="X">Kelas X</SelectItem>
                         <SelectItem value="XI">Kelas XI</SelectItem>
                         <SelectItem value="XII">Kelas XII</SelectItem>
@@ -268,7 +290,7 @@ export function TambahSiswaDialog({
 
               {/* Kelas */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="class"
                 render={({ field }) => (
                   <FormItem>
@@ -289,7 +311,7 @@ export function TambahSiswaDialog({
                           />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {availableClasses.map((cls) => (
                           <SelectItem key={cls} value={cls}>
                             {cls}
@@ -306,12 +328,15 @@ export function TambahSiswaDialog({
             <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2 mt-2 sm:mt-0">
               <Button
                 variant="outline"
+                type="button"
                 onClick={() => onOpenChange(false)}
                 className="w-full sm:w-auto"
               >
                 Batal
               </Button>
-              <Button className="w-full sm:w-auto">Simpan</Button>
+              <Button type="submit" className="w-full sm:w-auto">
+                {isEdit ? "Simpan Perubahan" : "Simpan"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

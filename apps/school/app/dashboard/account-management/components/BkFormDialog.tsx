@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import * as React from "react";
-import { Users } from "lucide-react";
+import { UserCheck, Pencil } from "lucide-react";
 
 import {
   Dialog,
@@ -28,16 +28,7 @@ import {
   SelectItem,
 } from "@appiks/ui";
 
-const classes = [
-  "X-A",
-  "X-B",
-  "XI-IPA-1",
-  "XI-IPS-1",
-  "XII-IPA-3",
-  "XII-IPS-2",
-];
-
-const waliSchema = z.object({
+const getBkSchema = (isEdit: boolean) => z.object({
   name: z
     .string()
     .min(1, "Nama lengkap tidak boleh kosong")
@@ -66,69 +57,97 @@ const waliSchema = z.object({
     .min(1, "NIP tidak boleh kosong")
     .length(18, "NIP harus tepat 18 digit")
     .regex(/^\d+$/, "NIP hanya boleh berisi angka"),
-  password: z
-    .string()
-    .min(1, "Password tidak boleh kosong")
-    .min(6, "Password minimal terdiri dari 6 karakter"),
-  homeroomClass: z.string().min(1, "Wali kelas harus dipilih"),
+  password: isEdit
+    ? z.string().min(6, "Password minimal terdiri dari 6 karakter").optional().or(z.literal(""))
+    : z.string().min(1, "Password tidak boleh kosong").min(6, "Password minimal terdiri dari 6 karakter"),
+  targetGroup: z.string().min(1, "Binaan kelas harus diisi"),
 });
 
-type WaliFormValues = z.infer<typeof waliSchema>;
+type BkFormValues = z.infer<ReturnType<typeof getBkSchema>>;
 
-interface TambahWaliDialogProps {
+interface BkFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (data: {
+  mode: "add" | "edit";
+  bkData?: any;
+  onSave: (data: {
     name: string;
     username: string;
     role: string;
     phone: string;
     nip: string;
-    password: string;
-    homeroomClass: string;
+    password?: string;
+    targetGroup: string;
   }) => void;
 }
 
-export function TambahWaliDialog({
+export function BkFormDialog({
   open,
   onOpenChange,
-  onAdd,
-}: TambahWaliDialogProps) {
-  const form = useForm<WaliFormValues>({
-    resolver: zodResolver(waliSchema),
+  mode,
+  bkData,
+  onSave,
+}: BkFormDialogProps) {
+  const isEdit = mode === "edit";
+  const currentSchema = React.useMemo(() => getBkSchema(isEdit), [isEdit]);
+
+  const form = useForm<BkFormValues>({
+    resolver: zodResolver(currentSchema) as any,
     defaultValues: {
       name: "",
       username: "",
-      role: "Guru Wali",
+      role: "Guru BK",
       phone: "",
       nip: "",
       password: "",
-      homeroomClass: "XI-IPA-1",
+      targetGroup: "Semua Kelas",
     },
   });
 
-  const onSubmit = (values: WaliFormValues) => {
-    onAdd({
-      ...values,
-      phone: `+62${values.phone}`,
-    });
-    form.reset();
-    onOpenChange(false);
+  const stripCountryCode = (phone: string) => {
+    if (phone?.startsWith("+62")) return phone.substring(3);
+    if (phone?.startsWith("62")) return phone.substring(2);
+    return phone || "";
   };
 
   React.useEffect(() => {
     if (open) {
-      form.reset({
-        name: "",
-        username: "",
-        role: "Guru Wali",
-        phone: "",
-        nip: "",
-        password: "",
-        homeroomClass: "XI-IPA-1",
-      });
+      if (isEdit && bkData) {
+        form.reset({
+          name: bkData.name || "",
+          username: bkData.username || bkData.name?.toLowerCase().replace(/\s+/g, "_") || "",
+          role: bkData.role || "Guru BK",
+          phone: stripCountryCode(bkData.phone),
+          nip: bkData.nip || "",
+          password: "",
+          targetGroup: bkData.targetGroup || "Semua Kelas",
+        });
+      } else {
+        form.reset({
+          name: "",
+          username: "",
+          role: "Guru BK",
+          phone: "",
+          nip: "",
+          password: "",
+          targetGroup: "Semua Kelas",
+        });
+      }
     }
-  }, [open, form]);
+  }, [open, isEdit, bkData, form]);
+
+  const onSubmit = (values: BkFormValues) => {
+    const submitValues = {
+      ...values,
+      phone: `+62${values.phone}`,
+    };
+    if (isEdit && !values.password) {
+      delete (submitValues as any).password;
+    }
+    onSave(submitValues as any);
+    form.reset();
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -136,19 +155,21 @@ export function TambahWaliDialog({
         <DialogHeader>
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left pb-2">
             <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
-              <Users className="size-6" />
+              {isEdit ? <Pencil className="size-6" /> : <UserCheck className="size-6" />}
             </div>
             <div className="space-y-1">
-              <DialogTitle>Tambah Akun Guru Wali</DialogTitle>
+              <DialogTitle>{isEdit ? "Edit Akun Guru BK" : "Tambah Akun Guru BK"}</DialogTitle>
               <DialogDescription>
-                Lengkapi formulir di bawah ini untuk membuat akun guru wali baru.
+                {isEdit
+                  ? "Perbarui formulir di bawah ini untuk mengubah data akun guru BK."
+                  : "Lengkapi formulir di bawah ini untuk membuat akun guru BK baru."}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit as any)}
             className="space-y-4 pt-2"
           >
             {/* Nama Lengkap */}
@@ -202,7 +223,7 @@ export function TambahWaliDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Guru Wali">Guru Wali</SelectItem>
+                      <SelectItem value="Guru BK">Guru BK</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -246,6 +267,7 @@ export function TambahWaliDialog({
                     <Input
                       placeholder="Masukkan 18 digit NIP..."
                       maxLength={18}
+                      disabled={isEdit}
                       {...field}
                     />
                   </FormControl>
@@ -260,11 +282,11 @@ export function TambahWaliDialog({
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{isEdit ? "Password Baru (Opsional)" : "Password"}</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Masukkan password..."
+                      placeholder={isEdit ? "Kosongkan jika tidak ingin mengubah..." : "Masukkan password..."}
                       {...field}
                     />
                   </FormControl>
@@ -273,27 +295,16 @@ export function TambahWaliDialog({
               )}
             />
 
-            {/* Wali Kelas */}
+            {/* Binaan Kelas */}
             <FormField
               control={form.control as any}
-              name="homeroomClass"
+              name="targetGroup"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Wali Kelas</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Pilih Kelas" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {classes.map((cls) => (
-                        <SelectItem key={cls} value={cls}>
-                          {cls}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Binaan Kelas</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Contoh: Kelas X & XII, Semua Kelas, dll." {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -302,12 +313,15 @@ export function TambahWaliDialog({
             <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2 mt-2 sm:mt-0">
               <Button
                 variant="outline"
+                type="button"
                 onClick={() => onOpenChange(false)}
                 className="w-full sm:w-auto"
               >
                 Batal
               </Button>
-              <Button className="w-full sm:w-auto">Simpan</Button>
+              <Button type="submit" className="w-full sm:w-auto">
+                {isEdit ? "Simpan Perubahan" : "Simpan"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

@@ -35,14 +35,10 @@ import { type ColumnFiltersState } from "@tanstack/react-table";
 
 // Import modular dialog components
 import { ImportSiswaDialog } from "./components/ImportSiswaDialog";
-import { TambahSiswaDialog } from "./components/TambahSiswaDialog";
-import { TambahWaliDialog } from "./components/TambahWaliDialog";
-import { TambahBkDialog } from "./components/TambahBkDialog";
-import { TambahKepsekDialog } from "./components/TambahKepsekDialog";
-import { EditSiswaDialog } from "./components/EditSiswaDialog";
-import { EditWaliDialog } from "./components/EditWaliDialog";
-import { EditBkDialog } from "./components/EditBkDialog";
-import { EditKepsekDialog } from "./components/EditKepsekDialog";
+import { SiswaFormDialog } from "./components/SiswaFormDialog";
+import { WaliFormDialog } from "./components/WaliFormDialog";
+import { BkFormDialog } from "./components/BkFormDialog";
+import { KepsekFormDialog } from "./components/KepsekFormDialog";
 import { ViewAccountDialog } from "./components/ViewAccountDialog";
 import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
 
@@ -656,12 +652,13 @@ function AccountManagement() {
         onImport={(imported) => setStudents((prev) => [...imported, ...prev])}
       />
 
-      <TambahSiswaDialog
+      <SiswaFormDialog
         open={isTambahSiswaOpen}
         onOpenChange={setIsTambahSiswaOpen}
+        mode="add"
         walis={walis}
         bks={bks}
-        onAdd={(newSiswa) =>
+        onSave={(newSiswa) =>
           setStudents((prev) => [
             { ...newSiswa, createdAt: todayDate, status: "Aktif" },
             ...prev,
@@ -669,10 +666,11 @@ function AccountManagement() {
         }
       />
 
-      <TambahWaliDialog
+      <WaliFormDialog
         open={isTambahWaliOpen}
         onOpenChange={setIsTambahWaliOpen}
-        onAdd={(newWali) =>
+        mode="add"
+        onSave={(newWali) =>
           setWalis((prev) => [
             {
               nip: newWali.nip,
@@ -686,10 +684,11 @@ function AccountManagement() {
         }
       />
 
-      <TambahBkDialog
+      <BkFormDialog
         open={isTambahBkOpen}
         onOpenChange={setIsTambahBkOpen}
-        onAdd={(newBk) =>
+        mode="add"
+        onSave={(newBk) =>
           setBks((prev) => [
             {
               nip: newBk.nip,
@@ -703,10 +702,11 @@ function AccountManagement() {
         }
       />
 
-      <TambahKepsekDialog
+      <KepsekFormDialog
         open={isTambahKepsekOpen}
         onOpenChange={setIsTambahKepsekOpen}
-        onAdd={(newKepsek) =>
+        mode="add"
+        onSave={(newKepsek) =>
           setKepseks((prev) => [
             {
               nip: newKepsek.nip,
@@ -739,10 +739,11 @@ function AccountManagement() {
       />
 
       {activeRole === "siswa" && (
-        <EditSiswaDialog
+        <SiswaFormDialog
           open={isEditOpen}
           onOpenChange={setIsEditOpen}
-          student={selectedItem}
+          mode="edit"
+          studentData={selectedItem}
           walis={walis}
           bks={bks}
           onSave={handleSaveEdit}
@@ -750,28 +751,31 @@ function AccountManagement() {
       )}
 
       {activeRole === "wali" && (
-        <EditWaliDialog
+        <WaliFormDialog
           open={isEditOpen}
           onOpenChange={setIsEditOpen}
-          wali={selectedItem}
+          mode="edit"
+          waliData={selectedItem}
           onSave={handleSaveEdit}
         />
       )}
 
       {activeRole === "bk" && (
-        <EditBkDialog
+        <BkFormDialog
           open={isEditOpen}
           onOpenChange={setIsEditOpen}
-          bk={selectedItem}
+          mode="edit"
+          bkData={selectedItem}
           onSave={handleSaveEdit}
         />
       )}
 
       {activeRole === "kepsek" && (
-        <EditKepsekDialog
+        <KepsekFormDialog
           open={isEditOpen}
           onOpenChange={setIsEditOpen}
-          kepsek={selectedItem}
+          mode="edit"
+          kepsekData={selectedItem}
           onSave={handleSaveEdit}
         />
       )}

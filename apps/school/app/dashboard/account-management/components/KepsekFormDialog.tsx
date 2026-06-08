@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import * as React from "react";
-import { Pencil } from "lucide-react";
+import { Shield, Pencil } from "lucide-react";
 
 import {
   Dialog,
@@ -28,16 +28,7 @@ import {
   SelectItem,
 } from "@appiks/ui";
 
-const classes = [
-  "X-A",
-  "X-B",
-  "XI-IPA-1",
-  "XI-IPS-1",
-  "XII-IPA-3",
-  "XII-IPS-2",
-];
-
-const waliSchema = z.object({
+const getKepsekSchema = (isEdit: boolean) => z.object({
   name: z
     .string()
     .min(1, "Nama lengkap tidak boleh kosong")
@@ -66,20 +57,19 @@ const waliSchema = z.object({
     .min(1, "NIP tidak boleh kosong")
     .length(18, "NIP harus tepat 18 digit")
     .regex(/^\d+$/, "NIP hanya boleh berisi angka"),
-  password: z
-    .string()
-    .min(6, "Password minimal terdiri dari 6 karakter")
-    .optional()
-    .or(z.literal("")),
-  homeroomClass: z.string().min(1, "Wali kelas harus dipilih"),
+  password: isEdit
+    ? z.string().min(6, "Password minimal terdiri dari 6 karakter").optional().or(z.literal(""))
+    : z.string().min(1, "Password tidak boleh kosong").min(6, "Password minimal terdiri dari 6 karakter"),
+  title: z.string().min(1, "Jabatan harus dipilih"),
 });
 
-type WaliFormValues = z.infer<typeof waliSchema>;
+type KepsekFormValues = z.infer<ReturnType<typeof getKepsekSchema>>;
 
-interface EditWaliDialogProps {
+interface KepsekFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  wali: any;
+  mode: "add" | "edit";
+  kepsekData?: any;
   onSave: (data: {
     name: string;
     username: string;
@@ -87,26 +77,30 @@ interface EditWaliDialogProps {
     phone: string;
     nip: string;
     password?: string;
-    homeroomClass: string;
+    title: string;
   }) => void;
 }
 
-export function EditWaliDialog({
+export function KepsekFormDialog({
   open,
   onOpenChange,
-  wali,
+  mode,
+  kepsekData,
   onSave,
-}: EditWaliDialogProps) {
-  const form = useForm<WaliFormValues>({
-    resolver: zodResolver(waliSchema),
+}: KepsekFormDialogProps) {
+  const isEdit = mode === "edit";
+  const currentSchema = React.useMemo(() => getKepsekSchema(isEdit), [isEdit]);
+
+  const form = useForm<KepsekFormValues>({
+    resolver: zodResolver(currentSchema) as any,
     defaultValues: {
       name: "",
       username: "",
-      role: "Guru Wali",
+      role: "Kepala Sekolah",
       phone: "",
       nip: "",
       password: "",
-      homeroomClass: "",
+      title: "Kepala Sekolah",
     },
   });
 
@@ -116,30 +110,42 @@ export function EditWaliDialog({
     return phone || "";
   };
 
-  // Pre-fill form when wali changes
   React.useEffect(() => {
-    if (open && wali) {
-      form.reset({
-        name: wali.name || "",
-        username: wali.username || wali.name?.toLowerCase().replace(/\s+/g, "_") || "",
-        role: wali.role || "Guru Wali",
-        phone: stripCountryCode(wali.phone),
-        nip: wali.nip || "",
-        password: "", // Keep password empty initially
-        homeroomClass: wali.homeroomClass || "",
-      });
+    if (open) {
+      if (isEdit && kepsekData) {
+        form.reset({
+          name: kepsekData.name || "",
+          username: kepsekData.username || kepsekData.name?.toLowerCase().replace(/\s+/g, "_") || "",
+          role: kepsekData.role || "Kepala Sekolah",
+          phone: stripCountryCode(kepsekData.phone),
+          nip: kepsekData.nip || "",
+          password: "",
+          title: kepsekData.title || "Kepala Sekolah",
+        });
+      } else {
+        form.reset({
+          name: "",
+          username: "",
+          role: "Kepala Sekolah",
+          phone: "",
+          nip: "",
+          password: "",
+          title: "Kepala Sekolah",
+        });
+      }
     }
-  }, [open, wali, form]);
+  }, [open, isEdit, kepsekData, form]);
 
-  const onSubmit = (values: WaliFormValues) => {
+  const onSubmit = (values: KepsekFormValues) => {
     const submitValues = {
       ...values,
       phone: `+62${values.phone}`,
     };
-    if (!values.password) {
-      delete submitValues.password;
+    if (isEdit && !values.password) {
+      delete (submitValues as any).password;
     }
-    onSave(submitValues);
+    onSave(submitValues as any);
+    form.reset();
     onOpenChange(false);
   };
 
@@ -149,19 +155,21 @@ export function EditWaliDialog({
         <DialogHeader>
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left pb-2">
             <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
-              <Pencil className="size-6" />
+              {isEdit ? <Pencil className="size-6" /> : <Shield className="size-6" />}
             </div>
             <div className="space-y-1">
-              <DialogTitle>Edit Akun Guru Wali</DialogTitle>
+              <DialogTitle>{isEdit ? "Edit Akun Kepala Sekolah" : "Tambah Akun Kepala Sekolah"}</DialogTitle>
               <DialogDescription>
-                Perbarui formulir di bawah ini untuk mengubah data akun guru wali.
+                {isEdit
+                  ? "Perbarui formulir di bawah ini untuk mengubah data kepala sekolah."
+                  : "Lengkapi formulir di bawah ini untuk membuat akun kepala sekolah baru."}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit as any)}
             className="space-y-4 pt-2"
           >
             {/* Nama Lengkap */}
@@ -215,7 +223,7 @@ export function EditWaliDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Guru Wali">Guru Wali</SelectItem>
+                      <SelectItem value="Kepala Sekolah">Kepala Sekolah</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -259,7 +267,7 @@ export function EditWaliDialog({
                     <Input
                       placeholder="Masukkan 18 digit NIP..."
                       maxLength={18}
-                      disabled // NIP is primary key and unique
+                      disabled={isEdit}
                       {...field}
                     />
                   </FormControl>
@@ -274,11 +282,11 @@ export function EditWaliDialog({
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password Baru (Opsional)</FormLabel>
+                  <FormLabel>{isEdit ? "Password Baru (Opsional)" : "Password"}</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Kosongkan jika tidak ingin mengubah..."
+                      placeholder={isEdit ? "Kosongkan jika tidak ingin mengubah..." : "Masukkan password..."}
                       {...field}
                     />
                   </FormControl>
@@ -287,25 +295,22 @@ export function EditWaliDialog({
               )}
             />
 
-            {/* Wali Kelas */}
+            {/* Jabatan */}
             <FormField
               control={form.control as any}
-              name="homeroomClass"
+              name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Wali Kelas</FormLabel>
+                  <FormLabel>Jabatan</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Pilih Kelas" />
+                        <SelectValue placeholder="Pilih Jabatan" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      {classes.map((cls) => (
-                        <SelectItem key={cls} value={cls}>
-                          {cls}
-                        </SelectItem>
-                      ))}
+                    <SelectContent position="popper">
+                      <SelectItem value="Kepala Sekolah">Kepala Sekolah Definitif</SelectItem>
+                      <SelectItem value="Plt. Kepala Sekolah">Plt. Kepala Sekolah</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -316,12 +321,15 @@ export function EditWaliDialog({
             <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2 mt-2 sm:mt-0">
               <Button
                 variant="outline"
+                type="button"
                 onClick={() => onOpenChange(false)}
                 className="w-full sm:w-auto"
               >
                 Batal
               </Button>
-              <Button className="w-full sm:w-auto">Simpan Perubahan</Button>
+              <Button type="submit" className="w-full sm:w-auto">
+                {isEdit ? "Simpan Perubahan" : "Simpan"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
