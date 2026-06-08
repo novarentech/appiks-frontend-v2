@@ -1,28 +1,65 @@
 import type { ReactNode } from "react";
+import {
+  AppSidebar,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  Separator,
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@appiks/ui";
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+import type { CustomUser } from "@appiks/types";
+import { auth } from "../../auth";
+
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const session = await auth();
+  const customUser = session?.user as CustomUser | undefined;
+  const user = customUser
+    ? {
+        name: customUser.name || customUser.username || "User",
+        role: customUser.role || "",
+      }
+    : undefined;
+
+  const logoutUrl = process.env.AUTH_URL
+    ? `${process.env.AUTH_URL}/logout`
+    : "http://localhost:3000/logout";
+
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar placeholder */}
-      <aside className="w-64 border-r bg-card flex flex-col">
-        <div className="h-16 flex items-center px-6 border-b">
-          <span className="font-bold text-lg text-foreground">Appiks</span>
-        </div>
-        <nav className="flex-1 p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Menu</p>
-          {/* Sidebar links akan diisi saat migrasi fitur */}
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <div className="flex-1 flex flex-col">
-        <header className="h-16 border-b bg-card flex items-center px-6 justify-between">
-          <span className="text-sm text-muted-foreground">Dashboard</span>
+    <SidebarProvider>
+      <AppSidebar user={user} logoutUrl={logoutUrl} />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">
+                    Build Your Application
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
         </header>
-        <main className="flex-1 p-6 overflow-auto">
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {children}
-        </main>
-      </div>
-    </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

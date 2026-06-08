@@ -13,7 +13,7 @@
   "aliases": {
     "components": "@appiks/ui/components",
     "utils": "@appiks/ui/utils/cn",
-    "ui": "@appiks/ui/components",
+    "ui": "@appiks/ui/components/ui",
     "lib": "@appiks/ui/utils",
     "hooks": "@appiks/ui/hooks"
   },
