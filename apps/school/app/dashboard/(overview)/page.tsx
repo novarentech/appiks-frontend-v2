@@ -159,7 +159,7 @@ export default function Page() {
   ];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       <DashboardHeader
         title="Dashboard"
         description="Ringkasan data siswa, staf pengajar, dan konseling bimbingan."
