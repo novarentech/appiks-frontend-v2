@@ -25,7 +25,13 @@ import {
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { Button } from "./button";
-import { NativeSelect, NativeSelectOption } from "./native-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 import {
   Table,
   TableBody,
@@ -150,26 +156,29 @@ export function DataTable<TData, TValue>({
             {filterColumns.map((filter) => {
               const column = table.getColumn(filter.id);
               if (!column) return null;
-              const filterValue = (column.getFilterValue() as string) ?? "";
+              const filterValue = (column.getFilterValue() as string) ?? "ALL";
               return (
-                <NativeSelect
+                <Select
                   key={filter.id}
-                  size="sm"
                   value={filterValue}
-                  onChange={(e) => {
-                    column.setFilterValue(e.target.value || undefined);
+                  onValueChange={(val) => {
+                    column.setFilterValue(val === "ALL" ? undefined : val);
                   }}
-                  className="w-full sm:w-auto min-w-[130px]"
                 >
-                  <NativeSelectOption value="">
-                    Semua {filter.title}
-                  </NativeSelectOption>
-                  {filter.options.map((opt) => (
-                    <NativeSelectOption key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  <SelectTrigger size="sm" className="h-9 w-full sm:w-auto min-w-[130px]">
+                    <SelectValue placeholder={`Semua ${filter.title}`} />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="ALL">
+                      Semua {filter.title}
+                    </SelectItem>
+                    {filter.options.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               );
             })}
 
@@ -202,7 +211,7 @@ export function DataTable<TData, TValue>({
       {/* Styled Table Container */}
       <div className="rounded-xl border bg-card text-card-foreground shadow-xs overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-primary/10 dark:bg-primary/10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
@@ -303,20 +312,23 @@ export function DataTable<TData, TValue>({
 
           <div className="flex items-center gap-2">
             <span className="text-xs">Baris per halaman:</span>
-            <NativeSelect
-              size="sm"
-              value={table.getState().pagination.pageSize}
-              onChange={(e) => {
-                table.setPageSize(Number(e.target.value));
+            <Select
+              value={String(table.getState().pagination.pageSize)}
+              onValueChange={(val) => {
+                table.setPageSize(Number(val));
               }}
-              className="h-8"
             >
-              {pageSizeOptions.map((size) => (
-                <NativeSelectOption key={size} value={size}>
-                  {size}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
+              <SelectTrigger size="sm" className="h-8 w-[70px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                {pageSizeOptions.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
