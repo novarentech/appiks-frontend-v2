@@ -57,10 +57,8 @@ export function useGetHeadteacherDashboard() {
   return useQuery({
     queryKey: dashboardKeys.headteacher(),
     queryFn: async () => {
-      // Path diasumsikan sudah ada API_BASE_URL (misal: https://api.appiks.id)
-      // Jadi kita panggil path relatifnya
       const res = await apiGet<HeadteacherDashboardData>(
-        "/api/dashboard/headteacher",
+        "/dashboard/headteacher",
       );
       if (!res.success)
         throw new Error(
@@ -80,7 +78,7 @@ export function useGetSuperDashboard() {
   return useQuery({
     queryKey: dashboardKeys.super(),
     queryFn: async () => {
-      const res = await apiGet<SuperDashboardData>("/api/dashboard/super");
+      const res = await apiGet<SuperDashboardData>("/dashboard/super");
       if (!res.success)
         throw new Error(res.message ?? "Gagal memuat data dashboard super");
       return res.data;
@@ -97,7 +95,7 @@ export function useGetAdminDashboard() {
   return useQuery({
     queryKey: dashboardKeys.admin(),
     queryFn: async () => {
-      const res = await apiGet<AdminDashboardData>("/api/dashboard/admin");
+      const res = await apiGet<AdminDashboardData>("/dashboard/admin");
       if (!res.success)
         throw new Error(res.message ?? "Gagal memuat data dashboard admin");
       return res.data;
@@ -114,7 +112,7 @@ export function useGetTeacherDashboard() {
   return useQuery({
     queryKey: dashboardKeys.teacher(),
     queryFn: async () => {
-      const res = await apiGet<TeacherDashboardData>("/api/dashboard/teacher");
+      const res = await apiGet<TeacherDashboardData>("/dashboard/teacher");
       if (!res.success)
         throw new Error(res.message ?? "Gagal memuat data dashboard teacher");
       return res.data;
@@ -132,7 +130,7 @@ export function useGetCounselorDashboard() {
     queryKey: dashboardKeys.counselor(),
     queryFn: async () => {
       const res = await apiGet<CounselorDashboardData>(
-        "/api/dashboard/counselor",
+        "/dashboard/counselor",
       );
       if (!res.success)
         throw new Error(res.message ?? "Gagal memuat data dashboard konselor");

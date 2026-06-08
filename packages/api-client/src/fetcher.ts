@@ -24,10 +24,13 @@ export async function baseApiFetch<T>(
     ...(headers ?? {}),
   };
 
+  const cleanBaseUrl = API_BASE_URL.replace(/\/$/, "");
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  const urlStr = `${cleanBaseUrl}${cleanPath}`;
+
   try {
     const response = await axios<ApiResponse<T>>({
-      url: path,
-      baseURL: API_BASE_URL,
+      url: urlStr,
       headers: requestHeaders,
       ...rest,
     });
