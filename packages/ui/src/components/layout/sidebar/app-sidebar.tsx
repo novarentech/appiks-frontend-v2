@@ -3,19 +3,26 @@
 import * as React from "react";
 import {
   AudioWaveform,
-  BookOpen,
-  Bot,
   Command,
-  Frame,
   GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
+  Home,
+  UserCog,
+  BookText,
+  Users,
+  MessageCircle,
+  Calendar,
+  School,
+  UserCheck,
+  Activity,
+  BookOpen,
+  Smile,
+  FileText,
+  Briefcase,
+  ClipboardList,
 } from "lucide-react";
+import { FaChalkboardTeacher } from "react-icons/fa";
 
 import { NavMain } from "./nav-main";
-import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
 import {
@@ -29,134 +36,190 @@ import {
   SidebarMenuButton,
 } from "../../ui/sidebar";
 
-// This is sample data.
+// Sample data for teams fallback
 const data = {
-  user: {
-    name: "shadcn",
-    role: "superadmin",
-    avatar: "/avatars/shadcn.jpg",
-  },
   teams: [
     {
-      name: "Acme Inc",
+      name: "Appiks Inc",
       logo: GalleryVerticalEnd,
       plan: "Enterprise",
     },
     {
-      name: "Acme Corp.",
+      name: "Appiks Corp.",
       logo: AudioWaveform,
       plan: "Startup",
     },
     {
-      name: "Evil Corp.",
+      name: "Appiks Ltd.",
       logo: Command,
       plan: "Free",
     },
   ],
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
+  user: {
+    name: "User",
+    role: "counselor",
+    avatar: "",
+  },
+};
+
+interface NavigationItem {
+  title: string;
+  url: string;
+  icon: React.ComponentType<any>;
+}
+
+// Menu definitions defined once to prevent duplication
+const adminNav: NavigationItem[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Kelola Akun",
+    url: "/dashboard/account-management",
+    icon: UserCog,
+  },
+  {
+    title: "Kelola Konten",
+    url: "/dashboard/content-management",
+    icon: BookText,
+  },
+  {
+    title: "Data Kelas",
+    url: "/dashboard/class-data",
+    icon: FaChalkboardTeacher,
+  },
+];
+
+const teacherNav: NavigationItem[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Data Siswa",
+    url: "/dashboard/student-data",
+    icon: Users,
+  },
+];
+
+const counselorNav: NavigationItem[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Data Siswa",
+    url: "/dashboard/student-data",
+    icon: Users,
+  },
+  {
+    title: "Curhatan Siswa",
+    url: "/dashboard/student-share",
+    icon: MessageCircle,
+  },
+  {
+    title: "Jadwal Konseling",
+    url: "/dashboard/counseling-schedule",
+    icon: Calendar,
+  },
+];
+
+const headteacherNav: NavigationItem[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Data Sekolah",
+    url: "/dashboard/school-data",
+    icon: UserCog,
+  },
+];
+
+const superadminNav: NavigationItem[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Kelola Sekolah",
+    url: "/dashboard/school-management",
+    icon: School,
+  },
+  {
+    title: "Kelola Admin",
+    url: "/dashboard/admin-management",
+    icon: Users,
+  },
+  {
+    title: "Kelola Psikolog",
+    url: "/dashboard/psychologist-management",
+    icon: UserCheck,
+  },
+  {
+    title: "Monitoring Sekolah",
+    url: "/dashboard/school-monitor",
+    icon: Activity,
+  },
+  {
+    title: "Kelola Konten",
+    url: "/dashboard/content",
+    icon: BookOpen,
+  },
+];
+
+const psychologistNav: NavigationItem[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Overview Mood",
+    url: "/dashboard/mood-overview",
+    icon: Smile,
+  },
+  {
+    title: "Catatan Sesi",
+    url: "/dashboard/session-notes",
+    icon: FileText,
+  },
+  {
+    title: "Kasus Siswa",
+    url: "/dashboard/student-cases",
+    icon: Briefcase,
+  },
+  {
+    title: "Laporan",
+    url: "/dashboard/reports",
+    icon: ClipboardList,
+  },
+  {
+    title: "Jadwal",
+    url: "/dashboard/schedule",
+    icon: Calendar,
+  },
+];
+
+// Mapping supporting all roles (matching roleMap keys)
+const roleBasedNavigation: Record<string, NavigationItem[]> = {
+  admin: adminNav,
+  teacher: teacherNav,
+  counselor: counselorNav,
+  headteacher: headteacherNav,
+  super: superadminNav,
+  psychologist: psychologistNav,
+};
+
+const getNormalizedRole = (role: string): string => {
+  if (!role) return "";
+  return role.toLowerCase().replace(/\s+/g, "").replace(/_/g, "");
 };
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -178,6 +241,8 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps) {
   const sidebarUser = user || data.user;
+  const roleKey = getNormalizedRole(sidebarUser.role || "");
+  const navigationItems = roleBasedNavigation[roleKey] || [];
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -193,7 +258,7 @@ export function AppSidebar({
                     <GalleryVerticalEnd className="size-4" />
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-medium">Documentation</span>
+                    <span className="font-medium">Appiks Portal</span>
                     <span className="">v1.0.0</span>
                   </div>
                 </a>
@@ -203,8 +268,7 @@ export function AppSidebar({
         )}
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavMain items={navigationItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={sidebarUser} logoutUrl={logoutUrl} profileUrl={profileUrl} />
