@@ -12,7 +12,7 @@ import {
   type ColumnFiltersState,
 } from "@tanstack/react-table";
 import * as React from "react";
-import { cn } from "../utils/cn";
+import { cn } from "../../utils/cn";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -30,7 +30,9 @@ export function DataTable<TData, TValue>({
   className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const table = useReactTable({
@@ -70,7 +72,10 @@ export function DataTable<TData, TValue>({
                   >
                     {header.isPlaceholder
                       ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </th>
                 ))}
               </tr>
@@ -79,17 +84,26 @@ export function DataTable<TData, TValue>({
           <tbody className="[&_tr:last-child]:border-0">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b transition-colors hover:bg-muted/50">
+                <tr
+                  key={row.id}
+                  className="border-b transition-colors hover:bg-muted/50"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="p-4 align-middle">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </td>
                   ))}
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                <td
+                  colSpan={columns.length}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   Tidak ada data.
                 </td>
               </tr>
@@ -112,7 +126,8 @@ export function DataTable<TData, TValue>({
             ← Sebelumnya
           </button>
           <span className="text-sm">
-            Hal {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+            Hal {table.getState().pagination.pageIndex + 1} /{" "}
+            {table.getPageCount()}
           </span>
           <button
             onClick={() => table.nextPage()}

@@ -11,7 +11,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "@appiks/ui/components/input-group";
+} from "./input-group";
 
 const Combobox = ComboboxPrimitive.Root;
 

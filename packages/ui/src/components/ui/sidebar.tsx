@@ -1,4 +1,4 @@
-"use client" 
+"use client";
 
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -9,21 +9,21 @@ import { useIsMobile } from "@appiks/ui/hooks/use-mobile";
 import { cn } from "@appiks/ui/utils/cn";
 import { Button } from "./button";
 import { Input } from "./input";
-import { Separator } from "@appiks/ui/components/separator";
+import { Separator } from "./separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@appiks/ui/components/sheet";
+} from "./sheet";
 import { Skeleton } from "./skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@appiks/ui/components/tooltip";
+} from "./tooltip";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
